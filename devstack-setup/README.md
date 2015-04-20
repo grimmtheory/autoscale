@@ -8,6 +8,6 @@ Abbreviated setup instructions are located in this repo. These instructions assu
 
 [http://www.github.com/grimmtheory/autoscale/devstack-setup/auto-devstack-setup.sh]
 
-> #!/bin/bash
->
-> # Install prerequisites
+	#!/bin/bash
+	
+	# Install prerequisites
