@@ -8,10 +8,10 @@ sudo adduser --disabled-password --gecos "" stack
 sudo echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 # Download and install devstack
-cd /home/stack
-git clone https://github.com/openstack-dev/devstack.git ./devstack/
-git clone https://github.com/openstack/heat-templates.git ./heat-templates/
-chown -vR stack:stack /home/stack
+sudo cd /home/stack
+sudo git clone https://github.com/openstack-dev/devstack.git ./devstack/
+sudo git clone https://github.com/openstack/heat-templates.git ./heat-templates/
+sudo chown -vR stack:stack /home/stack
 
 # Install and configure devstack
 su – stack
@@ -23,6 +23,9 @@ DATABASE_PASSWORD=$ADMIN_PASSWORD
 RABBIT_PASSWORD=$ADMIN_PASSWORD
 SERVICE_PASSWORD=$ADMIN_PASSWORD
 SERVICE_TOKEN=$ADMIN_PASSWORD
+
+# Hard set host ip as needed in multi-nic / multi-ip configurations
+# HOST_IP=172.16.80.110
 
 # Neutron - Networking Service
 disable_service n-net
