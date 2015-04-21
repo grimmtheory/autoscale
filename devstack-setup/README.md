@@ -58,7 +58,7 @@ http://www.github.com/grimmtheory/autoscale/devstack-setup/auto-devstack-setup.s
 	VERBOSE=True
 	LOG_COLOR=False
 	SCREEN_LOGDIR=/opt/stack/logs
-
-EOF
-
+	
+	EOF
+	
 	cd /home/stack/devstack; ./stack.sh
