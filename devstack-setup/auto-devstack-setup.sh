@@ -1,22 +1,57 @@
 #!/bin/bash
+clear
+
+# Cleanup
+echo "# Cleaning up prior installs"
+sudo userdel stack
+sudo sed -i -e 's/stack ALL=(ALL) NOPASSWD: ALL//g' /etc/sudoers
+sudo rm -rf /home/stack
+rm -rf ./devstack
+rm -rf ./heat-templates
+
+echo ""
 
 # Install prerequisites
-sudo apt-get -y install git
+echo "# Installing dependencies..."
+if sudo dpkg-query -l git | grep "no package"; then
+	echo "Installing git."
+	sudo apt-get -y install git > /dev/null
+else
+	echo "All dependencies installed."
+fi
+
+echo ""
 
 # Setup stack user
-sudo adduser --disabled-password --gecos "" stack
-sudo echo "stack ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+echo "# Setting up stack user..."
+if sudo grep stack /etc/passwd > /dev/null; then
+        echo "Stack user already exists."
+else
+	echo "Stack user added."
+        sudo useradd -d /home/stack -m stack
+	sudo sh -c "echo 'stack:stack' | chpasswd"
+fi
+
+echo ""
+
+echo "# Adding stack user to sudoers..."
+if sudo grep stack /etc/sudoers > /dev/null; then
+        echo "Stack user already in sudoers"
+else
+	echo "Added stack user to sudoers"
+        sudo sh -c "echo 'stack ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
+fi
+
+echo ""
 
 # Download and install devstack
-sudo cd /home/stack
-sudo git clone https://github.com/openstack-dev/devstack.git ./devstack/
-sudo git clone https://github.com/openstack/heat-templates.git ./heat-templates/
-sudo chown -vR stack:stack /home/stack
+git clone https://github.com/openstack-dev/devstack.git ./devstack/ > /dev/null
+git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
 
 # Install and configure devstack
-su – stack
-cat <<'EOF' > /home/stack/devstack/local.conf
+cat <<'EOF' > ./devstack/local.conf
 [[local|localrc]]
+
 # Auth Info
 ADMIN_PASSWORD=stack
 DATABASE_PASSWORD=$ADMIN_PASSWORD
@@ -51,7 +86,13 @@ LOGFILE=/opt/stack/logs/stack.sh.log
 VERBOSE=True
 LOG_COLOR=False
 SCREEN_LOGDIR=/opt/stack/logs
-
 EOF
 
-cd /home/stack/devstack; ./stack.sh
+# Copy files and fix permissions
+sudo cp -rf ./devstack /home/stack/
+sudo cp -rf ./heat-templates /home/stack/
+sudo chown -R stack:stack /home/stack/*
+
+# Change to stack user
+cd /home/stack
+sudo su stack
