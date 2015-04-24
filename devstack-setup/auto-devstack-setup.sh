@@ -107,17 +107,18 @@ disable_service s-proxy
 disable_service s-object
 disable_service s-container
 disable_service s-account
-# Cinder services
-disable_service cinder
-disable_service c-api
-disable_service c-vol
-disable_service c-sch
-disable_service c-bak
 
-# Database Backend MySQL
+# Enable Cinder services
+enable_service cinder
+enable_service c-api
+enable_service c-vol
+enable_service c-sch
+enable_service c-bak
+
+# Enable Database Backend MySQL
 enable_service mysql
 
-# RPC Backend RabbitMQ
+# Enable RPC Backend RabbitMQ
 enable_service rabbit
 
 # Enable Keystone - OpenStack Identity Service
@@ -140,12 +141,12 @@ enable_service q-lbaas
 enable_service neutron
 
 # VLAN configuration.
-Q_PLUGIN=ml2
-ENABLE_TENANT_VLANS=True
+# Q_PLUGIN=ml2
+# ENABLE_TENANT_VLANS=True
 
 # GRE tunnel configuration
-# Q_PLUGIN=ml2
-# ENABLE_TENANT_TUNNELS=True
+Q_PLUGIN=ml2
+ENABLE_TENANT_TUNNELS=True
 
 # VXLAN tunnel configuration
 # Q_PLUGIN=ml2
@@ -154,10 +155,10 @@ ENABLE_TENANT_VLANS=True
 # Enable Ceilometer - Metering Service (metering + alarming)
 enable_service ceilometer-acompute
 enable_service ceilometer-acentral
-enable_service ceilometer-collector
+enable_service ceilometer-anotification
 enable_service ceilometer-api
-enable_service ceilometer-alarm-notify
-enable_service ceilometer-alarm-eval
+enable_service ceilometer-alarm-notifier
+enable_service ceilometer-alarm-evaluator
 
 # Enable Heat - Orchestration Service
 enable_service heat
@@ -167,7 +168,7 @@ enagle_service h-api-cw
 enable_service h-eng
 
 # Images
-IMAGE_URLS+=",http://fedorapeople.org/groups/heat/prebuilt-jeos-images/F19-x86_64-cfntools.qcow2"
+IMAGE_URLS+="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img"
 
 # Output
 LOGFILE=/opt/stack/logs/stack.sh.log
