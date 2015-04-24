@@ -28,20 +28,22 @@ echo "# Setting up stack user..."
 if sudo grep stack /etc/passwd > /dev/null; then
         echo "Stack user already exists."
 else
-	echo "Stack user added."
         sudo useradd -d /home/stack -m stack
 	sudo sh -c "echo 'stack:stack' | chpasswd"
+	
+# Set stack.sh to run on first login
+cat <<'EOF' > ./stack.bashrc
 
-	cat <<'EOF' > /home/stack/.profile
-
-	if [ -d "/opt/stack" ] ; then
-	    echo "Devstack installed"
-	else
-	    echo "Installing Devstack"
-	    cd /home/stack/devstack
-	    ./stack.sh
-	fi
+if [ -d "/opt/stack" ] ; then
+    echo "Devstack installed"
+else
+    echo "Installing Devstack"
+    cd /home/stack/devstack
+    ./stack.sh
+fi
 EOF
+	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
+	echo "Stack user added."
 fi
 
 echo ""
