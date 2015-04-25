@@ -7,6 +7,7 @@ sudo userdel stack
 sudo sed -i -e 's/stack ALL=(ALL) NOPASSWD: ALL//g' /etc/sudoers
 sudo rm -rf /home/stack
 sudo rm -rf /opt/stack
+rm -rf ./stack.basrc
 rm -rf ./devstack
 rm -rf ./heat-templates
 
@@ -14,11 +15,12 @@ echo ""
 
 # Install prerequisites
 echo "# Installing dependencies..."
-if sudo dpkg-query -l git | grep "no package"; then
+sudo dpkg-query -l git | grep "no package" > /tmp/git.tmp
+if [ `cat /tmp/git.tmp` == "" ]; then
+	echo "All dependencies installed."
+else
 	echo "Installing git."
 	sudo apt-get -y install git > /dev/null
-else
-	echo "All dependencies installed."
 fi
 
 echo ""
