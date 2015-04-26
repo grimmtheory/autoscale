@@ -15,12 +15,12 @@ echo ""
 
 # Install prerequisites
 echo "# Installing dependencies..."
-sudo dpkg-query -l git | grep "no package" > /tmp/git.tmp
-if [ `cat /tmp/git.tmp` == "" ]; then
-	echo "All dependencies installed."
-else
+check=`sudo dpkg -s git | grep Status | grep installed`
+if [ "$check" == "" ]; then
 	echo "Installing git."
 	sudo apt-get -y install git > /dev/null
+else
+	echo "All dependencies installed."
 fi
 
 echo ""
@@ -68,6 +68,13 @@ git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /d
 cat <<'EOF' > ./devstack/local.conf
 [[local|localrc]]
 
+# Global Options
+LOGFILE=/opt/stack/logs/stack.sh.log
+RECLONE=yes
+VERBOSE=True
+LOG_COLOR=False
+SCREEN_LOGDIR=/opt/stack/logs
+
 # Auth Info
 ADMIN_PASSWORD=stack
 DATABASE_PASSWORD=$ADMIN_PASSWORD
@@ -86,9 +93,6 @@ HEAT_BRANCH=stable/kilo
 TROVE_BRANCH=stable/kilo
 HORIZON_BRANCH=stable/kilo
 SAHARA_BRANCH=stable/kilo
-
-# Hard set host ip as needed in multi-nic / multi-ip configurations
-# HOST_IP=172.16.80.110
 
 ## Disable unwanted services
 # Nova network and extra neutron services
@@ -142,13 +146,32 @@ enable_service q-meta
 enable_service q-lbaas
 enable_service neutron
 
+# Neutron Options
 # VLAN configuration.
-# Q_PLUGIN=ml2
-# ENABLE_TENANT_VLANS=True
+PUBLIC_SUBNET_NAME=public
+PRIVATE_SUBNET_NAME=private
+PUBLIC_INTERFACE=eth1
+FIXED_RANGE=10.1.0.0/24
+FIXED_NETWORK_SIZE=256
+NETWORK_GATEWAY=10.1.0.1
+# HOST_IP=192.168.1.109
+FLOATING_RANGE=192.168.1.224/27
+PUBLIC_NETWORK_GATEWAY=192.168.1.225
+ENABLE_TENANT_VLANS=True
+TENANT_VLAN_RANGE=3001:4000
+PHYSICAL_NETWORK=default
+OVS_PHYSICAL_BRIDGE=br-ex
+PROVIDER_SUBNET_NAME="provider_net"
+PROVIDER_NETWORK_TYPE="vlan"
+SEGMENTATION_ID=2010
+Q_PLUGIN=ml2
+Q_USE_SECGROUP=True
+Q_USE_PROVIDER_NETWORKING=True
+Q_L3_ENABLED=True
 
 # GRE tunnel configuration
-Q_PLUGIN=ml2
-ENABLE_TENANT_TUNNELS=True
+# Q_PLUGIN=ml2
+# ENABLE_TENANT_TUNNELS=True
 
 # VXLAN tunnel configuration
 # Q_PLUGIN=ml2
@@ -172,12 +195,10 @@ enable_service h-eng
 # Images
 IMAGE_URLS+="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img"
 
-# Output
-LOGFILE=/opt/stack/logs/stack.sh.log
-VERBOSE=True
-LOG_COLOR=False
-SCREEN_LOGDIR=/opt/stack/logs
 EOF
+
+# Add iptables forwarding rule for neutron / eth0
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # Copy files and fix permissions
 sudo cp -rf ./devstack /home/stack/
