@@ -4,6 +4,9 @@
 VAGRANTFILE_API_VERSION = "2"
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
+# Start config
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
 # Set commands to pass to all VMs during build time
 $commonscript = <<COMMONSCRIPT
 # Set verbose
@@ -17,13 +20,25 @@ echo root:stack | chpasswd
 
 # Populate hosts file
 cat << EOF >> /etc/hosts
+
 172.16.0.10 ubuntu1404
 172.16.0.11 xubuntu1404
 EOF
-COMMONSCRIPT
 
-# Start config
-Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+# Install Virtual Box guest additions
+sudo apt-get install linux-headers-generic build-essential dkms
+wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
+sudo mkdir /media/VBoxGuestAdditions
+sudo mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
+sudo sh /media/VBoxGuestAdditions/VBoxLinuxAdditions.run
+rm -rf VBoxGuestAdditions_4.3.26.iso
+sudo umount /media/VBoxGuestAdditions
+sudo rmdir /media/VBoxGuestAdditions
+
+# Reboot
+sudo reboot
+
+COMMONSCRIPT
 
   # Global options
 
@@ -39,19 +54,28 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ubuntu1404_config.vm.box = "base"
     ubuntu1404_config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
+    # Fix tty issue when passing scripts to inline
+    config.vm.provision "fix-no-tty", type: "shell" do |s|
+        s.privileged = false
+        s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+    end
+
+    # Execute shell script within the new vm after it boots
+    ubuntu1404_config.vm.provision "shell", inline: $commonscript
+
     # Configure networking
 
     # eth0 - Configured automatically as default Virtual Box NAT interface
 
     # eth1 - API / management network
-    ubuntu1404_config.vm.network "private_network", :adapter=>1 , ip: "172.16.1.10"
+    ubuntu1404_config.vm.network "private_network", :adapter => 2 , ip: "172.16.1.10"
 
     # eth2 - Neutron provider network
-    ubuntu1404_config.vm.network "private_network", :adapter=>2 , ip: "172.16.1.11"
+    ubuntu1404_config.vm.network "private_network", :adapter => 3 , ip: "172.16.1.11"
 
     # eth3 - Public network (bridged)
     # ubuntu1404_config.vm.network "public_network"
-    ubuntu1404_config.vm.network "public_network", :adapter => 3 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
+    ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
     ubuntu1404_config.vm.provider "virtualbox" do |vmoptions|
@@ -68,9 +92,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vmoptions.customize ["modifyvm", :id, "--hwvirtex", "on"]
         vmoptions.customize ["modifyvm", :id, "--ioapic", "on"]
     end
-
-    # Execute shell script within the new vm
-    ubuntu1404_config.vm.provision "shell", inline: $commonscript
 
   end
 
