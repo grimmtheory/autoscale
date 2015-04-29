@@ -79,15 +79,15 @@ On Ubuntu (or most other Debian-based systems):
 
 #### Manual Method
 
-If you want set your test machine manually follow these steps:
+If you want set your test machine up manually follow these steps:
 
-1. Download the Ubuntu 14.04.2 LTS Server 64-bit ISO from [here](http://releases.ubuntu.com/14.04.2/ubuntu-14.04.2-server-amd64.iso)
+1. Download the Ubuntu 14.04.2 LTS Server 64-bit ISO from Ubuntu [here](http://releases.ubuntu.com/14.04.2/ubuntu-14.04.2-server-amd64.iso)
 2. Launch Virtual Box and create a virtual machine
 3. Set the machine type to Linux - Ubuntu
 4. Set the vCPU count to at least 2
 5. Set the RAM size to at least 2 GB
 6. Set the disk size to at least 8 GB
-7. Set the number of NICs to 2 and configure them to be bridged to the same network
+7. Set the number of NICs to 2 and configure them to be bridged to the same network that contains the system's default route (Internet access)
 8. Mount the downloaded ISO into the virtual cdrom
 9. Boot the virtual machine and accept all installation defaults
 

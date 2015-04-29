@@ -4,10 +4,74 @@
 VAGRANTFILE_API_VERSION = "2"
 ENV['VAGRANT_DEFAULT_PROVIDER'] = 'virtualbox'
 
+# Set commands to pass to all VMs during build time
+$commonscript = <<COMMONSCRIPT
+# Set verbose
+set -v
+
+# Set exit on error
+set -e
+
+# Set passwords
+echo root:stack | chpasswd
+
+cat << EOF >> /etc/hosts
+172.16.0.10 ubuntu1404
+172.16.0.11 xubuntu1404
+EOF
+COMMONSCRIPT
+
+# Start config
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-config.vm.define "ubuntutest" do |ubuntutest|
-ubuntutest.vm.hostname = "ubuntu1404"
-ubuntutest.vm.box = "trusty-server"
-ubuntutest.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/latest/ubuntu-14.04-amd64-vbox.box"
-end
+
+  # Global options
+
+  # Turn off shared folders
+  config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
+
+  # Define firs instance - ubuntu1404 all-in-one devstack box configuration
+  config.vm.define "ubuntu1404" do |ubuntu1404_config|
+
+    # Provide box name, download url, etc.
+    ubuntu1404_config.vm.hostname = "ubuntu1404"
+    ubuntu1404_config.vm.box = "hashicorp/trusty64"
+    # ubuntu1404_config.vm.box = "base"
+    # ubuntu1404_config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+
+    # Configure networking
+
+    # eth0 - Configured automatically as default Virtual Box NAT interface
+
+    # eth1 - API / management network
+    ubuntu1404_config.vm.network "private_network", :adapter=>1 , ip: "172.16.1.10"
+
+    # eth2 - Neutron provider network
+    ubuntu1404_config.vm.network "private_network", :adapter=>2 , ip: "172.16.1.11"
+
+    # eth3 - Public network (bridged)
+    ubuntu1404_config.vm.network "public_network"
+    # ubuntu1404_config.vm.network "public_network", :adapter=>3 , type: "dhcp", :bridge => `en0: Wi-Fi (AirPort)'
+
+    # Define extra vm options
+    ubuntu1404_config.vm.provider "virtualbox" do |vmoptions|
+        # Enable logging to ui
+        vmoptions.gui = true
+        # Set CPU and RAM
+        vmoptions.customize ["modifyvm", :id, "--memory", "2048"]
+        vmoptions.customize ["modifyvm", :id, "--cpus", "2"]
+        # Enable promiscuous mode on nics
+        vmoptions.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+        # Set disk size, disabled for now requires local disk uuid to work
+        # vmoptions.customize ["modifyhd", "disk id", "--resize", "8192"]
+        # Enable VT pass through
+        vmoptions.customize ["modifyvm", :id, "--hwvirtex", "on"]
+        vmoptions.customize ["modifyvm", :id, "--ioapic", "on"]
+    end
+
+    # Execute shell script within the new vm
+    config.vm.provision "shell", inline: $commonscript
+
+
+  end
+
 end
