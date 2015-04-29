@@ -21,8 +21,7 @@ echo root:stack | chpasswd
 # Populate hosts file
 cat << EOF >> /etc/hosts
 
-172.16.0.10 ubuntu1404
-172.16.0.11 xubuntu1404
+172.16.1.10 ubuntu1404
 EOF
 
 # Configure network interfaces
@@ -60,20 +59,25 @@ iface eth3 inet dhcp
     post-up route del default dev $IFACE || true
 EOF
 
+cp -f /etc/network/interfaces /tmp/interfaces.original
 cp -f /tmp/interfaces /etc/network/interfaces
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 
 # Install Virtual Box guest additions
-apt-get -y install linux-headers-generic build-essential dkms
-wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
-mkdir /media/VBoxGuestAdditions
-mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
-sh -c "/media/VBoxGuestAdditions/VBoxLinuxAdditions.run --nox11" >> /dev/null 2>&1
-rm -rf VBoxGuestAdditions_4.3.26.iso
-umount /media/VBoxGuestAdditions
-rmdir /media/VBoxGuestAdditions
+# apt-get -y install linux-headers-generic build-essential dkms
+# wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
+# mkdir /media/VBoxGuestAdditions
+# mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
+# sh -c "/media/VBoxGuestAdditions/VBoxLinuxAdditions.run --nox11" >> /dev/null 2>&1
+# rm -rf VBoxGuestAdditions_4.3.26.iso
+# mkdir VBoxGuestAdditions_4.3.26
+# cp -r /media/VBoxGuestAdditions/* ./VBoxGuestAdditions_4.3.26/
+# umount /media/VBoxGuestAdditions
+# rmdir /media/VBoxGuestAdditions
+
+wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/devstack-setup/vbox-devstack-setup.sh
 
 # Reboot
 reboot
@@ -85,12 +89,11 @@ COMMONSCRIPT
   # Turn off shared folders
   config.vm.synced_folder ".", "/vagrant", id: "vagrant-root", disabled: true
 
-  # Define firs instance - ubuntu1404 all-in-one devstack box configuration
+  # Define first instance - ubuntu1404 all-in-one devstack box configuration
   config.vm.define "ubuntu1404" do |ubuntu1404_config|
 
     # Provide box name, download url, etc.
     ubuntu1404_config.vm.hostname = "ubuntu1404"
-    # ubuntu1404_config.vm.box = "hashicorp/trusty64"
     ubuntu1404_config.vm.box = "base"
     ubuntu1404_config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
