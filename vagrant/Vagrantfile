@@ -70,7 +70,7 @@ sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 
 # Install Virtual Box guest additions
 apt-get -y install linux-headers-generic build-essential dkms
-apt-get --no-install-recommends install virtualbox-guest-additions
+apt-get -y install virtualbox-guest-utils
 # wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
 # mkdir /media/VBoxGuestAdditions
 # mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
@@ -87,7 +87,7 @@ chmod +x ./vbox-devstack-setup.sh
 cp vbox-devstack-setup.sh /root
 
 # Verify VT-x
-apt-get install cpu-checker
+apt-get -y install cpu-checker
 kvm-ok
 
 # Reboot
@@ -125,7 +125,7 @@ COMMONSCRIPT
     ubuntu1404_config.vm.network "private_network", :adapter => 2 , ip: "172.16.1.10"
 
     # eth2 - Neutron provider network
-    ubuntu1404_config.vm.network "private_network", :adapter => 3 , ip: "172.16.1.11"
+    ubuntu1404_config.vm.network "private_network", :adapter => 3 , ip: "172.16.2.10"
 
     # eth3 - Public network (bridged)
     # ubuntu1404_config.vm.network "public_network"
