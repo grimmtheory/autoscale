@@ -33,18 +33,18 @@ else
         sudo useradd -d /home/stack -m stack
 	sudo sh -c "echo 'stack:stack' | chpasswd"
 	
-# Set stack.sh to run on first login
-cat <<'EOF' > ./stack.bashrc
-
-if [ -d "/opt/stack" ] ; then
-    echo "Devstack installed"
-else
-    echo "Installing Devstack"
-    cd /home/stack/devstack
-    ./stack.sh
-fi
-EOF
-	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
+# Set stack.sh to run on first login (Enable to launch devstack install on login)
+# cat <<'EOF' > ./stack.bashrc
+# 
+# if [ -d "/opt/stack" ] ; then
+#     echo "Devstack installed"
+# else
+#     echo "Installing Devstack"
+#     cd /home/stack/devstack
+#     ./stack.sh
+# fi
+# EOF
+# 	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
 	echo "Stack user added."
 fi
 
@@ -150,13 +150,13 @@ enable_service neutron
 # VLAN configuration.
 PUBLIC_SUBNET_NAME=public
 PRIVATE_SUBNET_NAME=private
-PUBLIC_INTERFACE=eth1
+PUBLIC_INTERFACE=eth2
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
 NETWORK_GATEWAY=10.1.0.1
-# HOST_IP=192.168.1.109
-FLOATING_RANGE=192.168.1.224/27
-PUBLIC_NETWORK_GATEWAY=192.168.1.225
+HOST_IP=172.16.0.10
+FLOATING_RANGE=172.16.0.224/27
+PUBLIC_NETWORK_GATEWAY=172.16.0.225
 ENABLE_TENANT_VLANS=True
 TENANT_VLAN_RANGE=3001:4000
 PHYSICAL_NETWORK=default
