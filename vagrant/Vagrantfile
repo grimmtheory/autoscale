@@ -51,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     # eth3 - Public network (bridged)
     # ubuntu1404_config.vm.network "public_network"
-    ubuntu1404_config.vm.network "public_network", :adapter=>3 , type: "dhcp", :bridge 'en0: Wi-Fi (AirPort)'
+    ubuntu1404_config.vm.network "public_network", :adapter => 3 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
     ubuntu1404_config.vm.provider "virtualbox" do |vmoptions|
