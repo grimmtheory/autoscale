@@ -70,10 +70,11 @@ cat <<'EOF' > ./devstack/local.conf
 
 # Global Options
 LOGFILE=/opt/stack/logs/stack.sh.log
-RECLONE=yes
 VERBOSE=True
 LOG_COLOR=False
 SCREEN_LOGDIR=/opt/stack/logs
+LOGDAYS=1
+RECLONE=yes
 
 # Auth Info
 ADMIN_PASSWORD=stack
@@ -128,7 +129,7 @@ enable_service mysql
 enable_service rabbit
 
 # Enable Keystone - OpenStack Identity Service
-enable_service key  
+enable_service key
 
 # Enable Horizon - OpenStack Dashboard Service
 enable_service horizon
@@ -193,7 +194,7 @@ enagle_service h-api-cw
 enable_service h-eng
 
 # Images
-IMAGE_URLS+="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img"
+IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-disk.img"
 
 EOF
 
