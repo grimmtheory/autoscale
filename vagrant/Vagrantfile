@@ -26,17 +26,17 @@ cat << EOF >> /etc/hosts
 EOF
 
 # Install Virtual Box guest additions
-sudo apt-get install linux-headers-generic build-essential dkms
-wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
-sudo mkdir /media/VBoxGuestAdditions
-sudo mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
-sudo sh /media/VBoxGuestAdditions/VBoxLinuxAdditions.run
-rm -rf VBoxGuestAdditions_4.3.26.iso
-sudo umount /media/VBoxGuestAdditions
-sudo rmdir /media/VBoxGuestAdditions
+# sudo apt-get -y install linux-headers-generic build-essential dkms
+# wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
+# sudo mkdir /media/VBoxGuestAdditions
+# sudo mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
+# sudo sh /media/VBoxGuestAdditions/VBoxLinuxAdditions.run
+# rm -rf VBoxGuestAdditions_4.3.26.iso
+# sudo umount /media/VBoxGuestAdditions
+# sudo rmdir /media/VBoxGuestAdditions
 
 # Reboot
-sudo reboot
+# sudo reboot
 
 COMMONSCRIPT
 
