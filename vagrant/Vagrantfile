@@ -77,7 +77,10 @@ sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 # umount /media/VBoxGuestAdditions
 # rmdir /media/VBoxGuestAdditions
 
+# Download devstack setup script
 wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/devstack-setup/vbox-devstack-setup.sh
+chmod +x ./vbox-devstack-setup.sh
+cp vbox-devstack-setup.sh /root
 
 # Reboot
 reboot

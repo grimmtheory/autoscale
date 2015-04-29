@@ -15,7 +15,7 @@ echo ""
 
 # Install prerequisites
 echo "# Installing dependencies..."
-check=`sudo dpkg -s git | grep Status | grep installed`
+check=`sudo dpkg -s git | grep Status | grep installed 2> /dev/null`
 if [ "$check" == "" ]; then
 	echo "Installing git."
 	sudo apt-get -y install git > /dev/null
@@ -34,17 +34,17 @@ else
 	sudo sh -c "echo 'stack:stack' | chpasswd"
 	
 # Set stack.sh to run on first login (Enable to launch devstack install on login)
-# cat <<'EOF' > ./stack.bashrc
-# 
-# if [ -d "/opt/stack" ] ; then
-#     echo "Devstack installed"
-# else
-#     echo "Installing Devstack"
-#     cd /home/stack/devstack
-#     ./stack.sh
-# fi
-# EOF
-# 	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
+cat <<'EOF' > ./stack.bashrc
+ 
+if [ -d "/opt/stack" ] ; then
+    echo "Devstack installed"
+else
+    echo "Installing Devstack"
+    cd /home/stack/devstack
+    ./stack.sh
+fi
+EOF
+	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
 	echo "Stack user added."
 fi
 
