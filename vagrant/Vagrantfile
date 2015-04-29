@@ -17,6 +17,7 @@ set -e
 
 # Set passwords
 echo root:stack | chpasswd
+echo vagrant:stack | chpasswd
 
 # Populate hosts file
 cat << EOF >> /etc/hosts
