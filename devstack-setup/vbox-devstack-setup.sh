@@ -79,7 +79,7 @@ neutron security-group-rule-create --protocol icmp --direction ingress default
 neutron security-group-rule-create --protocol tcp --port-range-min 22 --port-range-max 22 --direction ingress default
 
 # Create a test instance and assign a floating ip
-nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64-disk cirros1
+nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64-disk --key-name mykey cirros1
 # sleep 10
 EOF
 
