@@ -88,7 +88,10 @@ cp vbox-devstack-setup.sh /root
 
 # Verify VT-x
 apt-get -y install cpu-checker
-kvm-ok
+# kvm-ok
+
+# Install git for devstack
+apt-get -y install git
 
 # Reboot
 reboot
@@ -132,19 +135,19 @@ COMMONSCRIPT
     # ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
-    ubuntu1404_config.vm.provider "virtualbox" do |vmoptions|
+    ubuntu1404_config.vm.provider "virtualbox" do |vb|
         # Enable logging to ui
-        vmoptions.gui = true
+        vb.gui = true
         # Set CPU and RAM
-        vmoptions.customize ["modifyvm", :id, "--memory", "2048"]
-        vmoptions.customize ["modifyvm", :id, "--cpus", "2"]
+        vb.customize ["modifyvm", :id, "--memory", "2048"]
+        vb.customize ["modifyvm", :id, "--cpus", "2"]
         # Enable promiscuous mode on nics
-        vmoptions.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+        vb.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
         # Set disk size, disabled for now requires local disk uuid to work
-        # vmoptions.customize ["modifyhd", "disk id", "--resize", "8192"]
+        # vb.customize ["modifyhd", "disk id", "--resize", "8192"]
         # Enable VT pass through
-        vmoptions.customize ["modifyvm", :id, "--hwvirtex", "on"]
-        vmoptions.customize ["modifyvm", :id, "--ioapic", "on"]
+        vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+        vb.customize ["modifyvm", :id, "--ioapic", "on"]
     end
 
   end
