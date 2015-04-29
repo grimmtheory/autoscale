@@ -60,6 +60,29 @@ fi
 
 echo ""
 
+# Create some post stack tasks
+cat <<'EOF' > ./post-stack.sh
+
+# Source credentials
+cd /home/stack/devstack
+. openrc
+
+# Create ssh keys and add them
+cd /home/stack
+mkdir .ssh
+ssh-keygen -f ./.ssh/id_rsa -t rsa -N ''
+mod 700 ~/.ssh && chmod 600 ~/.ssh/*
+nova keypair-add --pub-key .ssh/id_rsa.pub mykey
+
+# Setup security groups
+neutron security-group-rule-create --protocol icmp --direction ingress default
+neutron security-group-rule-create --protocol tcp --port-range-min 22 --port-range-max 22 --direction ingress default
+
+# Create a test instance and assign a floating ip
+nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64-disk cirros1
+# sleep 10
+EOF
+
 # Download and install devstack
 git clone https://github.com/openstack-dev/devstack.git ./devstack/ > /dev/null
 git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
@@ -202,6 +225,7 @@ EOF
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # Copy files and fix permissions
+sudo cp -rf ./post-stack.sh /home/stack
 sudo cp -rf ./devstack /home/stack/
 sudo cp -rf ./heat-templates /home/stack/
 sudo chown -R stack:stack /home/stack/*
