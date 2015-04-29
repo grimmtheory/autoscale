@@ -67,7 +67,8 @@ cp -f /tmp/interfaces /etc/network/interfaces
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 
 # Install Virtual Box guest additions
-# apt-get -y install linux-headers-generic build-essential dkms
+apt-get -y install linux-headers-generic build-essential dkms
+apt-get --no-install-recommends install virtualbox-guest-additions
 # wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
 # mkdir /media/VBoxGuestAdditions
 # mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
@@ -82,6 +83,10 @@ sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/devstack-setup/vbox-devstack-setup.sh
 chmod +x ./vbox-devstack-setup.sh
 cp vbox-devstack-setup.sh /root
+
+# Verify VT-x
+apt-get install cpu-checker
+kvm-ok
 
 # Reboot
 reboot
@@ -122,7 +127,7 @@ COMMONSCRIPT
 
     # eth3 - Public network (bridged)
     # ubuntu1404_config.vm.network "public_network"
-    ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
+    # ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
     ubuntu1404_config.vm.provider "virtualbox" do |vmoptions|
