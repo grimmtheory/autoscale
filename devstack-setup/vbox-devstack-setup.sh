@@ -34,6 +34,7 @@ else
     echo "Installing Devstack"
     cd /home/stack/devstack
     ./stack.sh
+    ./post-stack.sh
 fi
 EOF
 	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
