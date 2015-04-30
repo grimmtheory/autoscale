@@ -27,6 +27,7 @@ HOSTSSCRIPT
 
 # Configure network interfaces
 ## Neutron testing, disable hard set interfaces file for now
+cp /etc/network/interfaces /root/interfaces.original
 cat << NETSCRIPT > /etc/network/interfaces
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
@@ -55,11 +56,12 @@ iface eth1 inet static
 auto eth2
 iface eth2 inet manual
       up ifconfig $IFACE 0.0.0.0 up
-      up ip link set  promisc on
-      down ip link set  promisc off
+      # up ip link set  promisc on
+      # down ip link set  promisc off
       down ifconfig  0.0.0.0 down
 #VAGRANT-END
 NETSCRIPT
+cp /etc/network/interfaces /root/interfaces.modified
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
@@ -120,10 +122,12 @@ COMMONSCRIPT
     # Auto-configured by Virtual Box
 
     # eth1 - API / management network
-    ubuntu1404_config.vm.network "private_network", :adapter => 2 ,ip: "172.16.1.15"
+    # ubuntu1404_config.vm.network "private_network", :adapter => 2 ,ip: "172.16.1.15"
+    ubuntu1404_config.vm.network "private_network", ip: "172.16.1.15"
 
     # eth2 - Neutron / bridge network
-    ubuntu1404_config.vm.network "private_network", :adapter => 3 ,ip: "172.16.2.15"
+    # ubuntu1404_config.vm.network "private_network", :adapter => 3 ,ip: "172.16.2.15"
+    ubuntu1404_config.vm.network "private_network", ip: "172.16.2.15"
 
     # eth3 - Public network (bridged adapter config if needed)
     # ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
@@ -136,7 +140,7 @@ COMMONSCRIPT
         vb.customize ["modifyvm", :id, "--memory", "2048"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
         # Enable promiscuous mode on nics
-        vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
         # Set disk size, disabled for now requires local disk uuid to work
         # vb.customize ["modifyhd", "disk id", "--resize", "8192"]
         # Enable VT pass through
