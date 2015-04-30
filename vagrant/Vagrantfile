@@ -72,6 +72,7 @@ sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 apt-get -y install linux-headers-generic build-essential dkms
 apt-get -y install virtualbox-guest-utils
 # wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
+# ISO method if needed
 # mkdir /media/VBoxGuestAdditions
 # mount -o loop,ro VBoxGuestAdditions_4.3.26.iso /media/VBoxGuestAdditions
 # sh -c "/media/VBoxGuestAdditions/VBoxLinuxAdditions.run --nox11" >> /dev/null 2>&1
@@ -90,8 +91,8 @@ cp vbox-devstack-setup.sh /root
 apt-get -y install cpu-checker
 # kvm-ok
 
-# Install git for devstack
-apt-get -y install git
+# Install git for devstack and some other tools
+apt-get -y install git nmap traceroute
 
 # Reboot
 reboot
