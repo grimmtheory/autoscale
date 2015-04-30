@@ -3,13 +3,11 @@ clear
 
 # Cleanup
 echo "# Cleaning up prior installs"
-sudo userdel stack > /dev/null
-sudo sed -i -e 's/stack ALL=(ALL) NOPASSWD: ALL//g' /etc/sudoers > /dev/null¬
 sudo rm -rf /home/stack > /dev/null¬
 sudo rm -rf /opt/stack > /dev/null¬
-rm -rf ./stack.basrc > /dev/null¬
-rm -rf ./devstack > /dev/null¬
-rm -rf ./heat-templates > /dev/null¬
+sudo rm -rf ./stack.basrc > /dev/null¬
+sudo rm -rf ./devstack > /dev/null¬
+sudo rm -rf ./heat-templates > /dev/null¬
 
 # Install prerequisites
 echo "# Installing dependencies..."
@@ -233,7 +231,7 @@ IMAGE_URLS="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 EOF
 
 # Add iptables forwarding rule for neutron / eth0
-sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+# sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # Copy files and fix permissions
 sudo cp -rf ./devstack /home/stack/
