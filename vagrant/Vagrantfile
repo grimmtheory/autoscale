@@ -26,13 +26,16 @@ cat << EOF >> /etc/hosts
 EOF
 
 # Configure network interfaces
-cp /etc/network/interfaces /tmp/interfaces.original
-cat /tmp/interfaces.original | sed -e 's/iface eth1 inet static/iface eth1 inet manual/' > /tmp/interfaces.modified
-sed -i -e 's/address 172.16.2.15/up ifconfig $IFACE 0.0.0.0 up/' /tmp/interfaces.modified
-echo -e "\tup ip link set $IFACE promisc on" >> /tmp/interfaces.modified
-echo -e "\tdown ip link set $IFACE promisc off" >> /tmp/interfaces.modified
-echo -e "\tdown ifconfig $IFACE 0.0.0.0 down" >> /tmp/interfaces.modified
-# cp /tmp/interfaces.modified /etc/network/interfaces
+netcurrent=/etc/network/interfaces
+netoriginal=/tmp/interfaces.original
+netmodified=/tmp/interfaces.modified
+cp $netcurrent $netoriginal
+cat $netoriginal | sed -e 's/iface eth1 inet static/iface eth1 inet manual/g' > $netmodified
+sed -i -e 's/address 172.16.2.15/up ifconfig $IFACE 0.0.0.0 up/g' $netmodified
+echo -e "\tup ip link set $IFACE promisc on" >> $netmodified
+echo -e "\tdown ip link set $IFACE promisc off" >> $netmodified
+echo -e "\tdown ifconfig $IFACE 0.0.0.0 down" >> $netmodified
+# cp $netmodified $netcurrent
 ## Neutron testing, disable hard set interfaces file for now
 # cat << EOF > /tmp/interfaces
 # This file describes the network interfaces available on your system
