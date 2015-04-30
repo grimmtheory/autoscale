@@ -30,7 +30,7 @@ netcurrent=/etc/network/interfaces
 netoriginal=/tmp/interfaces.original
 netmodified=/tmp/interfaces.modified
 cp $netcurrent $netoriginal
-cat $netoriginal | sed -e 's/iface eth1 inet static/iface eth1 inet manual/g' > $netmodified
+cat $netoriginal | sed -e 's/iface eth2 inet static/iface eth2 inet manual/g' > $netmodified
 sed -i -e 's/address 172.16.2.15/up ifconfig $IFACE 0.0.0.0 up/g' $netmodified
 echo -e "\tup ip link set $IFACE promisc on" >> $netmodified
 echo -e "\tdown ip link set $IFACE promisc off" >> $netmodified
@@ -62,9 +62,6 @@ echo -e "\tdown ifconfig $IFACE 0.0.0.0 down" >> $netmodified
 #       down ifconfig $IFACE 0.0.0.0 down
 # 
 # EOF
-
-cp -f /etc/network/interfaces /tmp/interfaces.original
-cp -f /tmp/interfaces /etc/network/interfaces
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf

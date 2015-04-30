@@ -15,15 +15,7 @@ echo ""
 
 # Install prerequisites
 echo "# Installing dependencies..."
-check=`sudo dpkg -s git | grep Status | grep installed 2> /dev/null`
-if [ "$check" == "" ]; then
-	echo "Installing git."
-	sudo apt-get -y install git > /dev/null
-else
-	echo "All dependencies installed."
-fi
-
-echo ""
+sudo apt-get -y install git > /dev/null
 
 # Setup stack user
 echo "# Setting up stack user..."
