@@ -225,9 +225,10 @@ EOF
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # Copy files and fix permissions
-sudo cp -rf ./post-stack.sh /home/stack
 sudo cp -rf ./devstack /home/stack/
 sudo cp -rf ./heat-templates /home/stack/
+sudo chmod +x ./post-stack.sh
+sudo cp -rf ./post-stack.sh /home/stack/devstack
 sudo chown -R stack:stack /home/stack/*
 
 # Change to stack user
