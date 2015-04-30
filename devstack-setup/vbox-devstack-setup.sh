@@ -98,6 +98,10 @@ SCREEN_LOGDIR=/opt/stack/logs
 LOGDAYS=1
 RECLONE=yes
 
+# Speedup DevStack Install
+UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
+UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+
 # Auth Info
 ADMIN_PASSWORD=stack
 DATABASE_PASSWORD=$ADMIN_PASSWORD
