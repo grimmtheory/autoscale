@@ -28,7 +28,8 @@ HOSTSSCRIPT
 # Configure network interfaces
 ## Neutron testing, disable hard set interfaces file for now
 cp /etc/network/interfaces /root/interfaces.original
-cat << NETSCRIPT > /etc/network/interfaces
+# cat << NETSCRIPT > /etc/network/interfaces
+cat << NETSCRIPT > /root/interfaces.modified
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -61,7 +62,7 @@ iface eth2 inet manual
       down ifconfig  0.0.0.0 down
 #VAGRANT-END
 NETSCRIPT
-cp /etc/network/interfaces /root/interfaces.modified
+# cp /etc/network/interfaces /root/interfaces.modified
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
@@ -96,7 +97,7 @@ cp vbox-devstack-setup.sh /root
 # apt-get -y install git nmap traceroute
 
 # Reboot
-reboot
+# reboot
 
 COMMONSCRIPT
 
@@ -140,7 +141,7 @@ COMMONSCRIPT
         vb.customize ["modifyvm", :id, "--memory", "2048"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
         # Enable promiscuous mode on nics
-        vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+        # vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
         # Set disk size, disabled for now requires local disk uuid to work
         # vb.customize ["modifyhd", "disk id", "--resize", "8192"]
         # Enable VT pass through
