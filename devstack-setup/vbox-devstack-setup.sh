@@ -213,7 +213,7 @@ enable_service ceilometer-alarm-evaluator
 enable_service heat
 enable_service h-api
 enable_service h-api-cfn
-enagle_service h-api-cw
+enable_service h-api-cw
 enable_service h-eng
 
 # Images
