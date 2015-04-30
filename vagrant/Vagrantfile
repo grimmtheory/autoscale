@@ -20,14 +20,14 @@ echo root:stack | chpasswd
 echo vagrant:stack | chpasswd
 
 # Populate hosts file
-cat << EOF >> /etc/hosts
+cat << HOSTSSCRIPT >> /etc/hosts
 
 172.16.1.15 ubuntu1404
-EOF
+HOSTSSCRIPT
 
 # Configure network interfaces
 ## Neutron testing, disable hard set interfaces file for now
-cat << EOF > /etc/network/interfaces
+cat << NETSCRIPT > /etc/network/interfaces
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -59,8 +59,7 @@ iface eth2 inet manual
       down ip link set  promisc off
       down ifconfig  0.0.0.0 down
 #VAGRANT-END
-
-# EOF
+NETSCRIPT
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
