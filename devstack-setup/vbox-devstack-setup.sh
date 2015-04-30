@@ -80,7 +80,6 @@ neutron security-group-rule-create --protocol tcp --port-range-min 22 --port-ran
 
 # Create a test instance and assign a floating ip
 nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64-disk --key-name mykey cirros1
-# sleep 10
 EOF
 
 # Download and install devstack
@@ -178,7 +177,7 @@ PUBLIC_INTERFACE=eth1
 FIXED_RANGE=10.16.1.0/24
 FIXED_NETWORK_SIZE=256
 NETWORK_GATEWAY=10.16.1.1
-HOST_IP=172.16.1.2
+HOST_IP=172.16.1.10
 FLOATING_RANGE=172.16.2.0/24
 PUBLIC_NETWORK_GATEWAY=172.16.2.2
 ENABLE_TENANT_VLANS=True
