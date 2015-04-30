@@ -47,6 +47,7 @@ else
     echo " | TOTAL RUN TIME:  $runtime |"
     echo " -----------------------------"
     echo ""
+    . openrc
 fi
 EOF
 	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
