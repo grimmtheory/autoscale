@@ -22,35 +22,43 @@ echo vagrant:stack | chpasswd
 # Populate hosts file
 cat << EOF >> /etc/hosts
 
-10.0.2.15 ubuntu1404
+172.16.1.15 ubuntu1404
 EOF
 
 # Configure network interfaces
-cat << EOF > /tmp/interfaces
+cp /etc/network/interfaces /tmp/interfaces.original
+cat /tmp/interfaces.original | sed -e 's/iface eth1 inet static/iface eth1 inet manual/' > /tmp/interfaces.modified
+sed -i -e 's/address 172.16.2.15/up ifconfig $IFACE 0.0.0.0 up/' /tmp/interfaces.modified
+echo -e "\tup ip link set $IFACE promisc on" >> /tmp/interfaces.modified
+echo -e "\tdown ip link set $IFACE promisc off" >> /tmp/interfaces.modified
+echo -e "\tdown ifconfig $IFACE 0.0.0.0 down" >> /tmp/interfaces.modified
+# cp /tmp/interfaces.modified /etc/network/interfaces
+## Neutron testing, disable hard set interfaces file for now
+# cat << EOF > /tmp/interfaces
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
 # The loopback network interface
-auto lo
-iface lo inet loopback
+# auto lo
+# iface lo inet loopback
 
 # API / host management network
-auto eth0
-iface eth0 inet static
-      address 10.0.2.15
-      netmask 255.255.255.0
-      gateway 10.0.2.2
-      dns-nameservers 10.0.2.3
-
+# auto eth0
+# iface eth0 inet static
+#       address 10.0.2.15
+#       netmask 255.255.255.0
+#       gateway 10.0.2.2
+#       dns-nameservers 10.0.2.3
+# 
 # Neutron bridge network
-auto eth1
-iface eth1 inet manual
-      up ifconfig $IFACE 0.0.0.0 up
-      up ip link set $IFACE promisc on
-      down ip link set $IFACE promisc off
-      down ifconfig $IFACE 0.0.0.0 down
-
-EOF
+# auto eth1
+# iface eth1 inet manual
+#       up ifconfig $IFACE 0.0.0.0 up
+#       up ip link set $IFACE promisc on
+#       down ip link set $IFACE promisc off
+#       down ifconfig $IFACE 0.0.0.0 down
+# 
+# EOF
 
 cp -f /etc/network/interfaces /tmp/interfaces.original
 cp -f /tmp/interfaces /etc/network/interfaces
@@ -59,8 +67,9 @@ cp -f /tmp/interfaces /etc/network/interfaces
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 
 # Install Virtual Box guest additions
-apt-get -y install linux-headers-generic build-essential dkms
-apt-get -y install virtualbox-guest-utils
+# Commented out temporarily to speed up builds
+# apt-get -y install linux-headers-generic build-essential dkms
+# apt-get -y install virtualbox-guest-utils
 # wget http://dlc-cdn.sun.com/virtualbox/4.3.26/VBoxGuestAdditions_4.3.26.iso
 # ISO method if needed
 # mkdir /media/VBoxGuestAdditions
@@ -78,14 +87,17 @@ chmod +x ./vbox-devstack-setup.sh
 cp vbox-devstack-setup.sh /root
 
 # Verify VT-x
-apt-get -y install cpu-checker
+# Commented out temporarily to speed up builds
+# apt-get -y install cpu-checker
 # kvm-ok
 
 # Install git for devstack and some other tools
-apt-get -y install git nmap traceroute
+# Commented out temporarily to speed up builds
+# apt-get -y install git nmap traceroute
 
 # Reboot
-reboot
+# Commented out temporarily to speed up builds
+# reboot
 
 COMMONSCRIPT
 
@@ -103,24 +115,27 @@ COMMONSCRIPT
     ubuntu1404_config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
     # Fix tty issue when passing scripts to inline
-    config.vm.provision "fix-no-tty", type: "shell" do |s|
-        s.privileged = false
-        s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
-    end
+    # config.vm.provision "fix-no-tty", type: "shell" do |s|
+    #     s.privileged = false
+    #     s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+    # end
 
     # Execute shell script within the new vm after it boots
     ubuntu1404_config.vm.provision "shell", inline: $commonscript
 
     # Configure networking
 
-    # eth0 - API / management network
+    # eth0 - Default route / NAT
     # Auto-configured by Virtual Box
 
-    # eth1 - Neutron / bridge network
-    ubuntu1404_config.vm.network "private_network", ip: "172.16.2.15"
+    # eth1 - API / management network
+    ubuntu1404_config.vm.network "private_network", :adapter => 2 ,ip: "172.16.1.15"
 
-    # eth2 - Public network (bridged adapter config if needed)
-    # ubuntu1404_config.vm.network "public_network", :adapter => 2 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
+    # eth2 - Neutron / bridge network
+    ubuntu1404_config.vm.network "private_network", :adapter => 3 ,ip: "172.16.2.15"
+
+    # eth3 - Public network (bridged adapter config if needed)
+    # ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
     ubuntu1404_config.vm.provider "virtualbox" do |vb|
@@ -130,7 +145,9 @@ COMMONSCRIPT
         vb.customize ["modifyvm", :id, "--memory", "2048"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
         # Enable promiscuous mode on nics
-        vb.customize ["modifyvm", :id, "--nicpromisc4", "allow-all"]
+        vb.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
+        vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+        vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
         # Set disk size, disabled for now requires local disk uuid to work
         # vb.customize ["modifyhd", "disk id", "--resize", "8192"]
         # Enable VT pass through

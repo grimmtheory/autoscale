@@ -71,7 +71,7 @@ cd /home/stack/devstack
 cd /home/stack
 mkdir .ssh
 ssh-keygen -f ./.ssh/id_rsa -t rsa -N ''
-mod 700 ~/.ssh && chmod 600 ~/.ssh/*
+chmod 700 ~/.ssh && chmod 600 ~/.ssh/*
 nova keypair-add --pub-key .ssh/id_rsa.pub mykey
 
 # Setup security groups
@@ -84,7 +84,8 @@ EOF
 
 # Download and install devstack
 git clone https://github.com/openstack-dev/devstack.git ./devstack/ > /dev/null
-git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
+# Disabled temporarily to speed up test builds
+# git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
 
 # Install and configure devstack
 cat <<'EOF' > ./devstack/local.conf
@@ -142,11 +143,12 @@ disable_service s-container
 disable_service s-account
 
 # Enable Cinder services
-enable_service cinder
-enable_service c-api
-enable_service c-vol
-enable_service c-sch
-enable_service c-bak
+# Disabled temporarily to speed up test builds
+# enable_service cinder
+# enable_service c-api
+# enable_service c-vol
+# enable_service c-sch
+# enable_service c-bak
 
 # Enable Database Backend MySQL
 enable_service mysql
@@ -181,7 +183,7 @@ PUBLIC_INTERFACE=eth1
 FIXED_RANGE=10.16.1.0/24
 FIXED_NETWORK_SIZE=256
 NETWORK_GATEWAY=10.16.1.1
-HOST_IP=10.0.2.15
+HOST_IP=172.16.1.15
 FLOATING_RANGE=172.16.2.0/24
 PUBLIC_NETWORK_GATEWAY=172.16.2.2
 ENABLE_TENANT_VLANS=True
@@ -220,7 +222,9 @@ enable_service h-api-cw
 enable_service h-eng
 
 # Images
-IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+# Disabled temporarily to speed up builds
+# IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+IMAGE_URLS="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 EOF
 
