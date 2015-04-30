@@ -3,13 +3,13 @@ clear
 
 # Cleanup
 echo "# Cleaning up prior installs"
-sudo userdel stack
-sudo sed -i -e 's/stack ALL=(ALL) NOPASSWD: ALL//g' /etc/sudoers
-sudo rm -rf /home/stack
-sudo rm -rf /opt/stack
-rm -rf ./stack.basrc
-rm -rf ./devstack
-rm -rf ./heat-templates
+sudo userdel stack 2>&1 /dev/null
+sudo sed -i -e 's/stack ALL=(ALL) NOPASSWD: ALL//g' /etc/sudoers 2>&1 /dev/null¬
+sudo rm -rf /home/stack 2>&1 /dev/null¬
+sudo rm -rf /opt/stack 2>&1 /dev/null¬
+rm -rf ./stack.basrc 2>&1 /dev/null¬
+rm -rf ./devstack 2>&1 /dev/null¬
+rm -rf ./heat-templates 2>&1 /dev/null¬
 
 echo ""
 

@@ -145,9 +145,7 @@ COMMONSCRIPT
         vb.customize ["modifyvm", :id, "--memory", "2048"]
         vb.customize ["modifyvm", :id, "--cpus", "2"]
         # Enable promiscuous mode on nics
-        vb.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
         vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
-        vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
         # Set disk size, disabled for now requires local disk uuid to work
         # vb.customize ["modifyhd", "disk id", "--resize", "8192"]
         # Enable VT pass through
