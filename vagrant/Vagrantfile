@@ -22,7 +22,7 @@ echo vagrant:stack | chpasswd
 # Populate hosts file
 cat << EOF >> /etc/hosts
 
-172.16.1.10 ubuntu1404
+10.0.2.15 ubuntu1404
 EOF
 
 # Configure network interfaces
@@ -37,10 +37,10 @@ iface lo inet loopback
 # API / host management network
 auto eth0
 iface eth0 inet static
-      address 172.16.1.10
+      address 10.0.2.15
       netmask 255.255.255.0
-      gateway 172.16.1.1
-      dns-nameservers 8.8.8.8 8.8.4.4 172.16.1.3
+      gateway 10.0.2.2
+      dns-nameservers 10.0.2.3
 
 # Neutron bridge network
 auto eth1
@@ -114,14 +114,13 @@ COMMONSCRIPT
     # Configure networking
 
     # eth0 - API / management network
-    ubuntu1404_config.vm.network "private_network", :adapter => 1 , ip: "172.16.1.10"
-      virtualbox__intnet: true
+    # Auto-configured by Virtual Box
 
     # eth1 - Neutron / bridge network
-    ubuntu1404_config.vm.network "private_network", :adapter => 2 , ip: "172.16.2.10"
+    ubuntu1404_config.vm.network "private_network", ip: "172.16.2.15"
 
     # eth2 - Public network (bridged adapter config if needed)
-    # ubuntu1404_config.vm.network "public_network", :adapter => 3 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
+    # ubuntu1404_config.vm.network "public_network", :adapter => 2 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
     # Define extra vm options
     ubuntu1404_config.vm.provider "virtualbox" do |vb|
