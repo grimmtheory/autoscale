@@ -70,7 +70,7 @@ mount -a
 mount -t iso9660 -o loop /mnt/vagrant/ubuntu-14.04.2-server-amd64-full.iso /media/cdrom
 echo "mount -t iso9660 -o loop /mnt/vagrant/ubuntu-14.04.2-server-amd64-full.iso /media/cdrom" >> /etc/rc.local
 cp /etc/apt/sources.list /etc/apt/sources.original
-echo "deb file:/media/cdrom trusty main restricted" > /etc/apt/sources.list
+echo "deb file:/media/cdrom trusty main restricted" >> /etc/apt/sources.list
 apt-get -y update
 
 # Install Virtual Box guest additions
