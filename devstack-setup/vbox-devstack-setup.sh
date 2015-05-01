@@ -99,9 +99,9 @@ SCREEN_LOGDIR=/opt/stack/logs
 LOGDAYS=1
 RECLONE=yes
 
-# Speedup DevStack Install
-UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
-UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+# Speedup DevStack Install, hard set mirror
+# UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
+# UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
 
 # Auth Info
 ADMIN_PASSWORD=stack
@@ -179,24 +179,30 @@ enable_service neutron
 # VLAN configuration.
 PUBLIC_SUBNET_NAME=public
 PRIVATE_SUBNET_NAME=private
+
 PUBLIC_INTERFACE=eth2
-FIXED_RANGE=10.16.1.0/24
+PHYSICAL_NETWORK=default
+HOST_IP=10.1.2.15
+OVS_PHYSICAL_BRIDGE=br-ex
+
+FIXED_RANGE=10.3.2.0/24
 FIXED_NETWORK_SIZE=256
-NETWORK_GATEWAY=10.16.1.1
-HOST_IP=172.16.1.15
-FLOATING_RANGE=172.16.2.128/24
-PUBLIC_NETWORK_GATEWAY=172.16.2.129
+NETWORK_GATEWAY=10.3.2.1
+
+FLOATING_RANGE=10.2.2.128/24
+PUBLIC_NETWORK_GATEWAY=10.2.2.129
+
 ENABLE_TENANT_VLANS=True
 TENANT_VLAN_RANGE=3001:4000
-PHYSICAL_NETWORK=default
-OVS_PHYSICAL_BRIDGE=br-ex
-PROVIDER_SUBNET_NAME="provider_net"
-PROVIDER_NETWORK_TYPE="vlan"
-SEGMENTATION_ID=2010
+
 Q_PLUGIN=ml2
 Q_USE_SECGROUP=True
-Q_USE_PROVIDER_NETWORKING=True
 Q_L3_ENABLED=True
+
+# PROVIDER_SUBNET_NAME="provider_net"
+# PROVIDER_NETWORK_TYPE="vlan"
+# Q_USE_PROVIDER_NETWORKING=True
+# SEGMENTATION_ID=2010
 
 # GRE tunnel configuration
 # Q_PLUGIN=ml2
@@ -231,7 +237,7 @@ IMAGE_URLS="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 EOF
 
 # Add iptables forwarding rule for neutron / eth0
-# sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
 # Copy files and fix permissions
 sudo cp -rf ./devstack /home/stack/
