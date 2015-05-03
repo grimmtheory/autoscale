@@ -62,8 +62,6 @@ apt-get -y install git nmap traceroute
 # ovs-vsctl show
 
 # Add some settings to sysctl and startup for networking
-echo "net.ipv4.conf.eth0.proxy_arp = 1" >> /etc/sysctl.conf
-echo "net.ipv4.conf.eth1.proxy_arp = 1" >> /etc/sysctl.conf
 echo "net.ipv4.conf.eth2.proxy_arp = 1" >> /etc/sysctl.conf
 echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
 echo "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE" >> /etc/rc.local
