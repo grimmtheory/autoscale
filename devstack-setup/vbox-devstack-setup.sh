@@ -32,7 +32,7 @@ else
     ./post-stack.sh
     echo ""
     devstart=`head -n 1 /opt/stack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
-    devstop=`tail -n 9 /opt/stack/logs/stack.sh.log | grep 2015 | awk '{ print $2 }' | cut -d . -f 1`
+    devstop=`tail -n 9 /opt/stack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
     startdate=$(date -u -d "$devstart" +"%s")
     enddate=$(date -u -d "$devstop" +"%s")
     runtime=`date -u -d "0 $enddate sec - $startdate sec" +"%H:%M:%S"`
@@ -180,6 +180,7 @@ PUBLIC_SUBNET_NAME="public"
 PRIVATE_SUBNET_NAME="private"
 
 PUBLIC_INTERFACE=eth2
+HOST_IP=192.168.253.129
 OVS_PHYSICAL_BRIDGE=br-ex
 
 FIXED_RANGE=10.0.254.128/25
