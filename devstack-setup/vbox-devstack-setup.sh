@@ -100,8 +100,8 @@ LOGDAYS=1
 RECLONE=yes
 
 # Speedup DevStack Install, hard set mirror
-# UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
-# UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
+UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
 
 # Auth Info
 ADMIN_PASSWORD=stack
@@ -177,19 +177,17 @@ enable_service neutron
 
 # Neutron Options
 # VLAN configuration.
-PUBLIC_SUBNET_NAME=public
-PRIVATE_SUBNET_NAME=private
+PUBLIC_SUBNET_NAME="public"
+PRIVATE_SUBNET_NAME="private"
 
 PUBLIC_INTERFACE=eth2
-PHYSICAL_NETWORK=default
 HOST_IP=10.1.2.15
 OVS_PHYSICAL_BRIDGE=br-ex
 
-FIXED_RANGE=192.168.10.0/24
-FIXED_NETWORK_SIZE=256
-NETWORK_GATEWAY=192.168.10.1
+FIXED_RANGE=192.168.2.128/25
+NETWORK_GATEWAY=192.168.2.129
 
-FLOATING_RANGE=10.2.2.128/24
+FLOATING_RANGE=10.2.2.128/25
 PUBLIC_NETWORK_GATEWAY=10.2.2.129
 
 ENABLE_TENANT_VLANS=True
@@ -213,35 +211,39 @@ SEGMENTATION_ID=2010
 # Q_ML2_TENANT_NETWORK_TYPE=vxlan
 
 # Enable Ceilometer - Metering Service (metering + alarming)
-# Disabled temporarily to speed up test builds
-# enable_service ceilometer-acompute
-# enable_service ceilometer-acentral
-# enable_service ceilometer-anotification
-# enable_service ceilometer-api
-# enable_service ceilometer-alarm-notifier
-# enable_service ceilometer-alarm-evaluator
+enable_service ceilometer-acompute
+enable_service ceilometer-acentral
+enable_service ceilometer-anotification
+enable_service ceilometer-api
+enable_service ceilometer-alarm-notifier
+enable_service ceilometer-alarm-evaluator
 
 # Enable Heat - Orchestration Service
-# Disabled temporarily to speed up test builds
-# enable_service heat
-# enable_service h-api
-# enable_service h-api-cfn
-# enable_service h-api-cw
-# enable_service h-eng
+enable_service heat
+enable_service h-api
+enable_service h-api-cfn
+enable_service h-api-cw
+enable_service h-eng
 
 # Images
-# Disabled temporarily to speed up builds
-# IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
-IMAGE_URLS="http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 EOF
 
 # Add iptables forwarding rule for neutron / eth0
 sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
 
+# Add some settings to sysctl and startup for neutron networking
+sudo echo "net.ipv4.conf.eth0.proxy_arp = 1" >> /etc/sysctl.conf
+sudo echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
+sudo echo "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE" >> /etc/rc.local
+sudo sysctl -p
+sudo sh -c /etc/rc.local
+
+
 # Copy files and fix permissions
 sudo cp -rf ./devstack /home/stack/
-# sudo cp -rf ./heat-templates /home/stack/
+sudo cp -rf ./heat-templates /home/stack/
 sudo chmod +x ./post-stack.sh
 sudo cp -rf ./post-stack.sh /home/stack/devstack
 sudo chown -R stack:stack /home/stack/*
