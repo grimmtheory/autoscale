@@ -161,7 +161,7 @@ enable_service key
 # Enable Horizon - OpenStack Dashboard Service
 enable_service horizon
 
-# Enable Glance -  OpenStack Image service 
+# Enable Glance - OpenStack Image Registry service 
 enable_service g-api
 enable_service g-reg
 
@@ -182,11 +182,11 @@ PRIVATE_SUBNET_NAME="private"
 PUBLIC_INTERFACE=eth2
 OVS_PHYSICAL_BRIDGE=br-ex
 
-FIXED_RANGE=192.168.2.128/25
-NETWORK_GATEWAY=192.168.2.129
+FIXED_RANGE=10.0.254.128/25
+NETWORK_GATEWAY=10.0.254.129
 
-FLOATING_RANGE=10.2.2.128/25
-PUBLIC_NETWORK_GATEWAY=10.2.2.129
+FLOATING_RANGE=192.168.254.128/25
+PUBLIC_NETWORK_GATEWAY=192.168.254.129
 
 ENABLE_TENANT_VLANS=True
 TENANT_VLAN_RANGE=3001:4000

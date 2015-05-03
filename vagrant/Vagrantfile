@@ -24,9 +24,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # Configure networking
     # eth0 - Default route / NAT, auto-configured and required by Virtual Box
     # eth1 - API / management network
-    devstack_config.vm.network "private_network", ip: "192.168.1.129"
+    devstack_config.vm.network "private_network", ip: "192.168.253.129"
     # eth2 - Neutron / bridge network
-    devstack_config.vm.network "private_network", ip: "192.168.2.129"
+    devstack_config.vm.network "private_network", ip: "192.168.254.129"
     # eth3 - Public network (bridged adapter config if needed)
     # devstack_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
 
