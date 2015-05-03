@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     ubuntu1404_config.vm.network "private_network", ip: "10.1.2.15"
 
     # eth2 - Neutron / bridge network
-    ubuntu1404_config.vm.network "private_network", ip: "10.2.2.15"
+    ubuntu1404_config.vm.network "private_network", ip: "10.2.2.129"
 
     # eth3 - Public network (bridged adapter config if needed)
     # ubuntu1404_config.vm.network "public_network", :adapter => 4 , type: "dhcp", :bridge => 'en0: Wi-Fi (AirPort)'
