@@ -5,7 +5,7 @@ clear
 echo "# Cleaning up prior installs"
 sudo rm -rf /home/stack > /dev/null¬
 sudo rm -rf /opt/stack > /dev/null¬
-sudo rm -rf ./stack.basrc > /dev/null¬
+sudo rm -rf ./stack.bashrc > /dev/null¬
 sudo rm -rf ./devstack > /dev/null¬
 sudo rm -rf ./heat-templates > /dev/null¬
 
@@ -19,11 +19,10 @@ if sudo grep stack /etc/passwd; then
         echo "Stack user already exists."
 else
         sudo useradd -d /home/stack -m stack
-	sudo sh -c "echo 'stack:stack' | chpasswd"
-	
-# Set stack.sh to run on first login (Enable to launch devstack install on login)
+        sudo sh -c "echo 'stack:stack' | chpasswd"
+        echo "# Setting up stack bashrc"
 cat <<'EOF' > ./stack.bashrc
- 
+
 if [ -d "/opt/stack" ] ; then
     echo "Devstack installed"
 else
@@ -48,15 +47,16 @@ else
     . openrc
 fi
 EOF
-	sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
-	echo "Stack user added."
+
+sudo sh -c "cat ./stack.bashrc >> /home/stack/.bashrc"
+echo "Stack user added."
 fi
 
 echo "# Adding stack user to sudoers..."
 if sudo grep stack /etc/sudoers > /dev/null; then
         echo "Stack user already in sudoers"
 else
-	echo "Added stack user to sudoers"
+        echo "Added stack user to sudoers"
         sudo sh -c "echo 'stack ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
 fi
 
@@ -84,8 +84,7 @@ EOF
 
 # Download and install devstack
 git clone https://github.com/openstack-dev/devstack.git ./devstack/ > /dev/null
-# Disabled temporarily to speed up test builds
-# git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
+git clone https://github.com/openstack/heat-templates.git ./heat-templates/ > /dev/null
 
 # Install and configure devstack
 cat <<'EOF' > ./devstack/local.conf
@@ -181,7 +180,6 @@ PUBLIC_SUBNET_NAME="public"
 PRIVATE_SUBNET_NAME="private"
 
 PUBLIC_INTERFACE=eth2
-HOST_IP=10.1.2.15
 OVS_PHYSICAL_BRIDGE=br-ex
 
 FIXED_RANGE=192.168.2.128/25

@@ -1,10 +1,6 @@
 #!/bin/bash
-# Set commands to pass to all VMs during build time
-# $commonscript = <<COMMONSCRIPT
-# Set verbose
+# Set verbose and set exit on error
 set -v
-
-# Set exit on error
 set -e
 
 # Set passwords
@@ -12,13 +8,11 @@ echo root:stack | chpasswd
 echo vagrant:stack | chpasswd
 
 # Populate hosts file
-cat << HOSTSSCRIPT >> /etc/hosts
-
-10.1.2.15 ubuntu1404
-HOSTSSCRIPT
+echo "192.168.1.129 devstack" >> /etc/hosts
 
 # Configure network interfaces
-cat << NETSCRIPT > /tmp/interfaces.modified
+cp /etc/network/interfaces /root/interfaces.original
+cat << NETSCRIPT > /etc/network/interfaces
 # The loopback network interface
 auto lo
 iface lo inet loopback
@@ -31,7 +25,7 @@ pre-up sleep 2
 # Management Network - Server management and all OpenStack services and API end-points
 auto eth1
 iface eth1 inet static
-      address 10.1.2.15
+      address 192.168.1.129
       netmask 255.255.255.0
 
 # Neutron Network - Tunnel, L3, LBaaS, DHCP, etc.
@@ -40,23 +34,14 @@ iface eth2 inet manual
       up ifconfig $IFACE 0.0.0.0 up
       down ifconfig  0.0.0.0 down
 NETSCRIPT
-
-cp /etc/network/interfaces /root/interfaces.original
-cp /tmp/interfaces.modified /root/interfaces.modified
-cp /tmp/interfaces.modified /etc/network/interfaces
+cp /etc/network/interfaces /root/interfaces.modified
 
 # Speedup boot time
 sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
 
-# Speedup installs, enable local ISO / CD repo
-# mount -a
-# mount -t iso9660 -o loop /mnt/vagrant/ubuntu-14.04.2-server-amd64-full.iso /media/cdrom
-# echo "mount -t iso9660 -o loop /mnt/vagrant/ubuntu-14.04.2-server-amd64-full.iso /media/cdrom" >> /etc/rc.local
-# cp /etc/apt/sources.list /etc/apt/sources.original
-# echo "deb file:/media/cdrom trusty main restricted" >> /etc/apt/sources.list
-# apt-get -y update
-
-# Install Virtual Box guest additions
+# Update and install Virtual Box guest additions
+apt-get -y update
+apt-get -y upgrade
 apt-get -y install linux-headers-generic build-essential dkms
 apt-get -y install virtualbox-guest-utils
 
@@ -87,4 +72,3 @@ sh -c /etc/rc.local
 
 # Reboot
 reboot
-# COMMONSCRIPT
