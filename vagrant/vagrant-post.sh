@@ -66,8 +66,6 @@ wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/vagrant/vagr
 wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/vagrant/Vagrantfile
 chmod +x ./*.sh
 cp ./* /root
-cp ./* /home/stack
-chown stack:stack /home/stack/*
 
 # Install git for devstack and some other tools
 apt-get -y install git nmap traceroute
