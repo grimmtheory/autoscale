@@ -29,6 +29,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       #!/usr/bin/env bash
 
+      echo root:stack | chpasswd
+      echo vagrant:stack | chpasswd
+
       apt-get update
       apt-get -y upgrade
       apt-get -y install git
