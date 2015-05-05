@@ -38,10 +38,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       git clone https://github.com/openstack-dev/devstack.git ./devstack/
 
-      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc /home/vagrant/bashrc
+      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc ./bashrc
       cat /home/vagrant/bashrc >> /home/vagrant/.bashrc; rm -rf /home/vagrant/bashrc
-      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf /home/vagrant/devstack/local.conf
-      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces /etc/network/interfaces
+
+      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf ./local.conf
+      cp ./local.conf ./devstack/local.conf
+
+      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces ./interfaces
+      cp ./interfaces /etc/network/interfaces
 
       echo "net.ipv4.conf.eth2.proxy_arp = 1" >> /etc/sysctl.conf
       echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
