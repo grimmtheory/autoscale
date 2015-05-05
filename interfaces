@@ -1,21 +1,46 @@
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+# The loopback network interface
 auto lo
 iface lo inet loopback
 
-# Vagrant Network
+# The primary network interface
 auto eth0
 iface eth0 inet dhcp
-pre-up sleep 2
 
-# Management Network
+# The management interface
 auto eth1
-iface eth1 inet static
-address 192.168.254.10
-netmask 255.255.255.0
+iface eth1 inet manual
+up ip link set eth1 up
+up ip link set eth1 promisc on
+down ip link set eth1 promisc off
+down ip link set eth1 down
 
-# Neutron Network
+# The public interface
 auto eth2
 iface eth2 inet manual
-up ifconfig  0.0.0.0 up
-up ip link set  promisc on
-down ip link set  promisc off
-down ifconfig  0.0.0.0 down
+up ip link set eth2 up
+down ip link set eth2 down
+
+# auto lo
+# iface lo inet loopback
+
+# Vagrant Network
+# auto eth0
+# iface eth0 inet dhcp
+# pre-up sleep 2
+
+# Management Network
+# auto eth1
+# iface eth1 inet static
+# address 192.168.254.10
+# netmask 255.255.255.0
+
+# Neutron Network
+# auto eth2
+# iface eth2 inet manual
+# up ifconfig  0.0.0.0 up
+# up ip link set  promisc on
+# down ip link set  promisc off
+# down ifconfig  0.0.0.0 down
