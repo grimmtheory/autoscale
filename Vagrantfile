@@ -14,7 +14,7 @@ Vagrant.configure(2) do |config|
     vb.gui = true
     vb.memory = "4096"
     vb.cpus = "2"
-    vb.name = "devstack"
+    # vb.name = "devstack"
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
   end
