@@ -1,0 +1,22 @@
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Auto-configured by Vagrant, default route out / NAT
+auto eth0
+iface eth0 inet dhcp
+pre-up sleep 2
+
+# Management Network - Server management and all OpenStack services and API end-points
+auto eth1
+iface eth1 inet static
+address 192.168.253.129
+netmask 255.255.255.0
+
+# Neutron Network - Tunnel, L3, LBaaS, DHCP, etc.
+auto eth2
+iface eth2 inet manual
+up ifconfig  0.0.0.0 up
+up ip link set  promisc on
+down ip link set  promisc off
+down ifconfig  0.0.0.0 down
