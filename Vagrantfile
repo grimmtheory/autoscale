@@ -8,24 +8,24 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.synced_folder "./", "/vagrant", disabled: true
 
-  config.vm.define "autostack" do |autostack_config|
+  config.vm.provider "virtualbox" do |vb|
 
-    autostack_config.vm.box = "ubuntu/trusty64"
-    autostack_config.vm.hostname = “autostack”
+    vb.gui = true
+    vb.memory = "4096"
+    vb.cpus = "2"
+    vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
-    autostack_config.vm.network "private_network", ip: "192.168.254.10"
-    autostack_config.vm.network "private_network", ip: "172.16.254.10"
+  end
 
-    autostack_config.vm.provider "virtualbox" do |vb|
+  config.vm.define "devstack" do |devstack_config|
 
-      vb.gui = true
-      vb.memory = "4096"
-      vb.cpus = "2"
-      vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    devstack_config.vm.box = "ubuntu/trusty64"
+    # devstack_config.vm.hostname = “devstack”
 
-    end
+    devstack_config.vm.network "private_network", ip: "192.168.254.10"
+    devstack_config.vm.network "private_network", ip: "172.16.254.10"
 
-    autostack_config.vm.provision "shell", privileged: false, inline: <<-SHELL
+    devstack_config.vm.provision "shell", privileged: false, inline: <<-SHELL
 
       #!/usr/bin/env bash
 
@@ -33,12 +33,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       sudo apt-get -y upgrade
       sudo apt-get -y install git
 
-      sudo git clone https://github.com/openstack-dev/autostack.git ./autostack/
+      sudo git clone https://github.com/openstack-dev/devstack.git ./devstack/
 
-      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc ~/
+      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc ~/bashrc
       sudo cat ~/bashrc >> ~/.bashrc; sudo rm -rf ~/bashrc
-      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf ~/autostack
-      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces /etc/network/interfaces
+      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf ~/devstack
+      sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces ~/interfaces
+      sudo cp ~/interfaces /etc/network/interfaces
 
       reboot
 
