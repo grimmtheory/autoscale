@@ -18,7 +18,7 @@ Vagrant.configure(2) do |config|
       vb.name = "devstack"
       vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
-  end
+    end
 
     devstack_config.vm.provision "shell", privileged: false, inline: <<-SHELL
 
@@ -31,12 +31,14 @@ Vagrant.configure(2) do |config|
       sudo git clone https://github.com/openstack-dev/devstack.git ./devstack/
 
       sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc ~/
-      cat ~/bashrc >> ~/.bashrc; rm -rf ~/bashrc
+      sudo cat ~/bashrc >> ~/.bashrc; sudo rm -rf ~/bashrc
       sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf ~/devstack
       sudo wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces /etc/network/interfaces
 
-    reboot
+      reboot
 
-  SHELL
+    SHELL
+
+  end
 
 end
