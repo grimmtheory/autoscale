@@ -46,6 +46,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       sysctl -p
       sh -c /etc/rc.local
 
+      sed -i -e 's/sleep/# sleep/g' /etc/init/failsafe.conf
+
       chown -R vagrant:vagrant /home/vagrant
 
       reboot
