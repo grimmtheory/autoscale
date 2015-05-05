@@ -5,7 +5,7 @@ Vagrant.configure(2) do |config|
   # config.vm.box = "base"
   config.vm.box = "ubuntu/trusty64"
 
-  config.vm.hostname = “devstack”
+  config.vm.hostname = “autoscale”
   config.vm.network "private_network", ip: "192.168.254.10"
   config.vm.network "private_network", ip: "172.16.254.10"
 
