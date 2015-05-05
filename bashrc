@@ -5,7 +5,7 @@ if [ -d "/opt/stack" ] ; then
     . openrc
 else
     echo "Installing Devstack"
-    cd /home/stack/devstack
+    cd /home/vagrant/devstack
     ./stack.sh
     echo ""
     devstart=`head -n 1 /opt/stack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`

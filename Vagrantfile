@@ -37,9 +37,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/bashrc /home/vagrant/bashrc
       cat /home/vagrant/bashrc >> /home/vagrant/.bashrc; rm -rf /home/vagrant/bashrc
-      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf /home/vagrant/devstack
-      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces /home/vagrant/interfaces
-      cp /home/vagrant/interfaces /etc/network/interfaces
+      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/local.conf /home/vagrant/devstack/local.conf
+      wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/interfaces /etc/network/interfaces
 
       echo "net.ipv4.conf.eth2.proxy_arp = 1" >> /etc/sysctl.conf
       echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf
