@@ -3,7 +3,7 @@
 
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
-DEVSTACK_BRANCH = "master"
+DEVSTACK_BRANCH = "stable/kilo"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
@@ -35,6 +35,10 @@ HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
+# Speedup DevStack Install, hard set mirror
+UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
+UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
 NEUTRON_BRANCH=#{DEVSTACK_BRANCH}
@@ -51,7 +55,7 @@ SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
 SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
 
 SCREEN_LOGDIR=/opt/stack/logs
-LOGFILE=/home/stack/devstack/logs/stack.sh.log
+LOGFILE=/home/stack/vagrant/logs/stack.sh.log
 
 INSTANCES_PATH=/home/vagrant/instances
 FLAT_INTERFACE=eth2
@@ -81,11 +85,11 @@ disable_service s-container
 disable_service s-account
 
 # Enable Cinder services
-enable_service cinder
-enable_service c-api
-enable_service c-vol
-enable_service c-sch
-enable_service c-bak
+# enable_service cinder
+# enable_service c-api
+# enable_service c-vol
+# enable_service c-sch
+# enable_service c-bak
 
 # Enable Database Backend MySQL
 enable_service mysql
