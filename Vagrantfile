@@ -55,7 +55,7 @@ SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
 SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
 
 SCREEN_LOGDIR=/opt/stack/logs
-LOGFILE=/home/stack/vagrant/logs/stack.sh.log
+LOGFILE=/home/vagrant/devstack/logs/stack.sh.log
 
 INSTANCES_PATH=/home/vagrant/instances
 FLAT_INTERFACE=eth2
