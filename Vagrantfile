@@ -170,6 +170,9 @@ iface br-ex inet static
       up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
 BREX
 
+cd /home/vagrant
+wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/post.sh .
+
     EOF
 
 end
