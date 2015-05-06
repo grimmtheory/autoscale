@@ -3,7 +3,7 @@
 
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
-DEVSTACK_BRANCH = "stable/kilo"
+DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
@@ -36,8 +36,9 @@ DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
 # Speedup DevStack Install, hard set mirror
-UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
-UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
+UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
+UBUNTU_INST_HTTP_PROXY="192.168.33.254:3128"
 
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
@@ -228,7 +229,6 @@ fixed_ip=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $12}' | aw
 device_id=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $2}'`
 port_id=`neutron port-list -c id -- --device_id $device_id | tail -n2 | head -n1 | awk '{print $2}'`
 neutron floatingip-create --fixed-ip-address $fixed_ip --port-id $port_id public
-
 POST
 
     # fix permissions as the cloned repo is owned by root
