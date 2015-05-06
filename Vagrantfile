@@ -13,6 +13,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.gui = true
     vb.memory = "4096"
     vb.cpus = "2"
+    vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
   end
@@ -23,7 +24,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # devstack_config.vm.hostname = “devstack”
 
     devstack_config.vm.network "private_network", ip: "192.168.254.10"
-    devstack_config.vm.network "private_network", ip: "172.16.254.10"
+    devstack_config.vm.network "private_network", ip: "192.168.254.11"
 
     devstack_config.vm.provision "shell", privileged: true, inline: <<-SHELL
 
