@@ -51,7 +51,7 @@ SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
 SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
 
 SCREEN_LOGDIR=/opt/stack/logs
-LOGFILE=/opt/stack/logs/stack.sh.log
+LOGFILE=/home/stack/devstack/logs/stack.sh.log
 
 INSTANCES_PATH=/home/vagrant/instances
 FLAT_INTERFACE=eth2
@@ -104,7 +104,7 @@ enable_service g-api
 enable_service g-reg
 
 # Images
-IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+# IMAGE_URLS="http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 # Enable Neutron
 enable_service q-svc
@@ -170,10 +170,12 @@ iface br-ex inet static
       up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
 BREX
 
-    cat << POST > /home/vagrant/devstack/post.sh
+    cat << POST > /home/vagrant/post.sh
+cd /home/vagrant/devstack
+
 # Report stack.sh run time
-devstart=`head -n 1 /opt/stack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
-devstop=`tail -n 9 /opt/stack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
+devstart=`head -n 1 /home/vagrant/devstack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
+devstop=`tail -n 9 /home/vagrant/devstack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
 startdate=$(date -u -d "$devstart" +"%s")
 enddate=$(date -u -d "$devstop" +"%s")
 runtime=`date -u -d "0 $enddate sec - $startdate sec" +"%H:%M:%S"`
@@ -187,11 +189,13 @@ echo " -----------------------------"
 echo ""
 
 # generate a keypair and make it available via share
+cd /home/vagrant
 ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/vm_key
 cp -f /home/vagrant/.ssh/vm_key /vagrant/vm_key
 cp -f /home/vagrant/.ssh/vm_key /home/vagrant/vm_key
 
 # add the vagrant keypair and open up security groups
+cd /home/vagrant/devstack
 for user in admin demo; do
   source openrc $user $user
   nova keypair-add --pub-key /home/vagrant/.ssh/vm_key.pub vagrant
@@ -211,7 +215,7 @@ cd /home/vagrant/devstack
 source openrc demo demo
 
 # boot a cirros instance
-nova boot --flavor m1.tiny --image cirros-0.3.3-x86_64-disk.img --key-name vagrant cirros
+nova boot --flavor m1.tiny --image cirros-0.3.2-x86_64-uec --key-name vagrant cirros
 sleep 15
 nova list
 
@@ -220,6 +224,7 @@ fixed_ip=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $12}' | aw
 device_id=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $2}'`
 port_id=`neutron port-list -c id -- --device_id $device_id | tail -n2 | head -n1 | awk '{print $2}'`
 neutron floatingip-create --fixed-ip-address $fixed_ip --port-id $port_id public
+
 POST
 
     # fix permissions as the cloned repo is owned by root
@@ -227,7 +232,8 @@ POST
 
     # Execute post.sh
     cd /home/vagrant
-    ./post.sh
+    chmod +x ./post.sh
+    # ./post.sh
 
     EOF
 
