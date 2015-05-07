@@ -18,7 +18,8 @@ Vagrant.configure("2") do |config|
   # virtual-box specific settings
   config.vm.provider :virtualbox do |vb|
     vb.gui = true
-    vb.customize ["modifyvm", :id, "--memory", 4096]
+    vb.customize ["modifyvm", :id, "--cpus", "4"]
+    vb.customize ["modifyvm", :id, "--memory", 8192]
     # eth2 must be in promiscuous mode for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
@@ -27,10 +28,7 @@ Vagrant.configure("2") do |config|
     apt-get update
     apt-get install git -y
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
-    # cd /home/vagrant/devstack && git checkout -b stable/kilo origin/stable/kilo
     cd /home/vagrant/devstack
-    echo 'Acquire:http:Proxy "http://192.168.33.254:3142";' > /etc/apt/apt.conf.d/90-apt-proxy.conf
-    apt-get -y update
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
 HOST_IP=#{HOST_IP}
