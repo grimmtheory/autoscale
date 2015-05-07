@@ -58,13 +58,14 @@ sleep 5
 nova list
 
 # Create a flavor, image and boot new image
+cd /home/vagrant/devstack
 source openrc admin admin
 cd /home/vagrant/devstack/files
 wget http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img
 glance image-create --name ubuntu-qcow2 --file ubuntu-14.04-server-cloudimg-amd64-disk1.img --is-public True --progress --disk-format qcow2 --container-format bare
 nova flavor-create --is-public true m1.custom 6 1 4 1
 
-cd /home/devstack
+cd /home/vagrant/devstack
 source openrc demo demo
 nova boot --flavor m1.custom --image ubuntu-qcow2 --key-name vagrant ubuntu
 
