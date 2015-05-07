@@ -110,6 +110,7 @@ enable_service g-api
 enable_service g-reg
 
 # Images
+IMAGE_URLS+=",https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img"
 # IMAGE_URLS+=,"http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 # Enable Neutron
