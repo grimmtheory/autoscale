@@ -22,6 +22,7 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--memory", 8192]
     # eth2 must be in promiscuous mode for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
   end
 
   config.vm.provision "shell", inline: <<-EOF
@@ -38,7 +39,7 @@ DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 # Speedup DevStack Install, hard set mirror
 UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
 UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
-UBUNTU_INST_HTTP_PROXY="192.168.33.254:3128"
+# UBUNTU_INST_HTTP_PROXY="192.168.33.254:3128"
 
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
