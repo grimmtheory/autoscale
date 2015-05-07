@@ -29,6 +29,7 @@ Vagrant.configure("2") do |config|
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
     # cd /home/vagrant/devstack && git checkout -b stable/kilo origin/stable/kilo
     cd /home/vagrant/devstack
+    echo 'Acquire:http:Proxy "http://192.168.33.254:3142";' > /etc/apt/apt.conf.d/90-apt-proxy.conf
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
 HOST_IP=#{HOST_IP}
