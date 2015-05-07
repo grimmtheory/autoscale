@@ -52,3 +52,6 @@ fixed_ip=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $12}' | aw
 device_id=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $2}'`
 port_id=`neutron port-list -c id -- --device_id $device_id | tail -n2 | head -n1 | awk '{print $2}'`
 neutron floatingip-create --fixed-ip-address $fixed_ip --port-id $port_id public
+
+nova list
+
