@@ -177,7 +177,7 @@ BREX
 
     # Download post.sh
     wget https://github.com/grimmtheory/autoscale/blob/master/post.sh
-    chmod +s post.sh
+    chmod +x post.sh
 
     # fix permissions as the cloned repo is owned by root
     chown -R vagrant:vagrant /home/vagrant
