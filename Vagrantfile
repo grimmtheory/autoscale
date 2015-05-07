@@ -30,6 +30,7 @@ Vagrant.configure("2") do |config|
     # cd /home/vagrant/devstack && git checkout -b stable/kilo origin/stable/kilo
     cd /home/vagrant/devstack
     echo 'Acquire:http:Proxy "http://192.168.33.254:3142";' > /etc/apt/apt.conf.d/90-apt-proxy.conf
+    apt-get -y update
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
 HOST_IP=#{HOST_IP}
@@ -110,7 +111,7 @@ enable_service g-api
 enable_service g-reg
 
 # Images
-IMAGE_URLS+=,"http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
+# IMAGE_URLS+=,"http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
 
 # Enable Neutron
 enable_service q-svc
@@ -178,7 +179,7 @@ BREX
 
     # Download post.sh
     cd /home/vagrant
-    wget https://github.com/grimmtheory/autoscale/blob/master/post.sh
+    wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/post.sh
     chmod +x ./post.sh
 
     # fix permissions as the cloned repo is owned by root
