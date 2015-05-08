@@ -84,7 +84,7 @@ neutron security-group-rule-create default --protocol icmp
 neutron security-group-rule-create default --protocol tcp --port-range-min 22 --port-range-max 22
 neutron security-group-rule-create default --protocol tcp --port-range-min 80 --port-range-max 80
 
-neutron lbaas-loadbalancer-create --name lb1 private-subnet
+neutron lbaas-loadbalancer-create --name lb1 --vip-address 10.0.0.100 private-subnet
 neutron lbaas-listener-create --loadbalancer lb1 --protocol HTTP --protocol-port 80 --name listener1
 neutron lbaas-pool-create --lb-algorithm ROUND_ROBIN --listener listener1 --protocol HTTP --name pool1
 neutron lbaas-member-create  --subnet private-subnet --address 10.0.0.101 --protocol-port 80 pool1
