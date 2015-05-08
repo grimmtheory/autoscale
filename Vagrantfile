@@ -87,11 +87,11 @@ disable_service s-container
 disable_service s-account
 
 # Enable Cinder services
-# enable_service cinder
-# enable_service c-api
-# enable_service c-vol
-# enable_service c-sch
-# enable_service c-bak
+enable_service cinder
+enable_service c-api
+enable_service c-vol
+enable_service c-sch
+enable_service c-bak
 
 # Enable Database Backend MySQL
 enable_service mysql

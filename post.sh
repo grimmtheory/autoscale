@@ -39,19 +39,19 @@ done
 neutron subnet-update public-subnet --dns_nameservers list=true 8.8.8.8
 neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
 
-# cd /home/vagrant/devstack
-# source openrc demo demo
+cd /home/vagrant/devstack
+source openrc demo demo
 
 # boot a cirros instance
-# nova boot --flavor m1.tiny --image cirros-0.3.2-x86_64-uec --key-name vagrant cirros
-# sleep 15
-# nova list
+nova boot --flavor m1.tiny --image cirros-0.3.0-x86_64-disk --key-name vagrant cirros
+sleep 15
+nova list
 
 # assign a floating ip
-# fixed_ip=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $12}' | awk -F= '{ print $2 }' | sed -e 's/,//g'`
-# device_id=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $2}'`
-# port_id=`neutron port-list -c id -- --device_id $device_id | tail -n2 | head -n1 | awk '{print $2}'`
-# neutron floatingip-create --fixed-ip-address $fixed_ip --port-id $port_id public
+fixed_ip=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $12}' | awk -F= '{ print $2 }' | sed -e 's/,//g'`
+device_id=`nova list --name cirros | tail -n2 | head -n1 | awk '{print $2}'`
+port_id=`neutron port-list -c id -- --device_id $device_id | tail -n2 | head -n1 | awk '{print $2}'`
+neutron floatingip-create --fixed-ip-address $fixed_ip --port-id $port_id public
 
 # sleep 5
 
@@ -69,9 +69,9 @@ neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
 # source openrc demo demo
 # nova boot --flavor m1.custom --image ubuntu-qcow2 --key-name vagrant ubuntu
 
-# sleep 15
+sleep 15
 
-# nova list
+nova list
 
 # create nova instances on private network
 nova boot --image $(nova image-list | awk '/ cirros-0.3.0-x86_64-disk / {print $2}') --flavor 1 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.101 --key-name vagrant node1
@@ -79,10 +79,10 @@ nova boot --image $(nova image-list | awk '/ cirros-0.3.0-x86_64-disk / {print $
 sleep 15
 nova list 
 
-#add secgroup rule to allow ssh etc..
-neutron security-group-rule-create default --protocol icmp
-neutron security-group-rule-create default --protocol tcp --port-range-min 22 --port-range-max 22
-neutron security-group-rule-create default --protocol tcp --port-range-min 80 --port-range-max 80
+# add secgroup rule to allow ssh etc..
+# neutron security-group-rule-create default --protocol icmp
+# neutron security-group-rule-create default --protocol tcp --port-range-min 22 --port-range-max 22
+# neutron security-group-rule-create default --protocol tcp --port-range-min 80 --port-range-max 80
 
 neutron lbaas-loadbalancer-create --name lb1 --vip-address 10.0.0.100 private-subnet
 neutron lbaas-listener-create --loadbalancer lb1 --protocol HTTP --protocol-port 80 --name listener1
