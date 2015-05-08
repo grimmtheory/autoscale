@@ -187,7 +187,7 @@ BREX
 
     # Execute post.sh
     chmod +x ./post.sh
-    ./post.sh
+    # ./post.sh
 
     EOF
 
