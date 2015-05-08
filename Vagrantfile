@@ -9,8 +9,7 @@ DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "hashicorp/trusty64"
-  # config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "ubuntu/trusty64"
   # config.vm.box = "base"
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack"
@@ -23,14 +22,13 @@ Vagrant.configure("2") do |config|
     vb.gui = true
     vb.customize ["modifyvm", :id, "--cpus", "4"]
     vb.customize ["modifyvm", :id, "--memory", 8192]
-    # eth2 must be in promiscuous mode for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
     vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
   end
 
   config.vm.provision "shell", inline: <<-EOF
     apt-get update
-    apt-get install git -y
+    apt-get -y install git openvswitch-switch
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
@@ -166,6 +164,7 @@ SYSCTL
 auto eth2
 iface eth2 inet manual
 ETH2
+
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
