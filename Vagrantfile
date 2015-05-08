@@ -3,13 +3,15 @@
 
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
-DEVSTACK_BRANCH = "stable/kilo"
+# DEVSTACK_BRANCH = "stable/kilo"
+DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
+  config.vm.box = "hashicorp/trusty64"
   # config.vm.box = "ubuntu/trusty64"
-  config.vm.box = "base"
+  # config.vm.box = "base"
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack"
   # eth1, this will be the management endpoint
