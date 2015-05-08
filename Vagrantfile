@@ -3,7 +3,7 @@
 
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
-DEVSTACK_BRANCH = "master"
+DEVSTACK_BRANCH = "stable/kilo"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
@@ -37,8 +37,8 @@ DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
 # Speedup DevStack Install, hard set mirror
-UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
-UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
+# UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
+# UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
 # UBUNTU_INST_HTTP_PROXY="192.168.33.254:3128"
 
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
@@ -69,29 +69,24 @@ PUBLIC_NETWORK_GATEWAY=#{VM_NET}.2
 Q_FLOATING_ALLOCATION_POOL=start=#{VM_NET}.3,end=#{VM_NET}.254
 
 ## Disable unwanted services
-# Nova network
 disable_service n-net
-# Tempest services
 disable_service tempest
-# Sahara
 disable_service sahara
-# Trove services
 disable_service trove
 disable_service tr-api
 disable_service tr-mgr
 disable_service tr-cond
-# Swift services
 disable_service s-proxy
 disable_service s-object
 disable_service s-container
 disable_service s-account
 
 # Enable Cinder services
-enable_service cinder
-enable_service c-api
-enable_service c-vol
-enable_service c-sch
-enable_service c-bak
+# enable_service cinder
+# enable_service c-api
+# enable_service c-vol
+# enable_service c-sch
+# enable_service c-bak
 
 # Enable Database Backend MySQL
 enable_service mysql
@@ -136,7 +131,6 @@ enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
 enable_service h-eng
-
 CONF
 
     # Set passwords
