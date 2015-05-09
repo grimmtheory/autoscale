@@ -26,7 +26,7 @@ sleep 5
 # setup 3 web instances
 num=1
 while [ $num -le 3 ]; do
-  nova boot --image $(nova image-list | awk '/ cirros-0.3.0-x86_64-euc / {print $2}') --flavor 1 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
+  nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 1 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
   sleep 5
   num=$(( $num + 1 ))
 done
