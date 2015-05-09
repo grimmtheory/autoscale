@@ -4,13 +4,15 @@ cd /home/vagrant/devstack; source openrc admin admin
 
 # generate a keypair and make it available via share
 cd /home/vagrant
-ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
+ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/vm_key
+cp -f /home/vagrant/.ssh/vm_key /vagrant/vm_key
+cp -f /home/vagrant/.ssh/vm_key /home/vagrant/vm_key
 
 # add the vagrant keypair and open up security groups
 cd /home/vagrant/devstack
 for user in admin demo; do
   source openrc $user $user
-  nova keypair-add --pub-key /home/vagrant/.ssh/id_rsa.pub vagrant
+  nova keypair-add --pub-key /home/vagrant/.ssh/vm_key.pub vagrant
   nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
   nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
   nova secgroup-add-rule default tcp 80 80 0.0.0.0/0
@@ -23,7 +25,7 @@ neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
 
 sleep 5
 
-# setup 3 web instances
+# setup web instances
 num=1
 while [ $num -le 3 ]; do
   nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 1 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
@@ -45,9 +47,11 @@ neutron lb-pool-create --lb-method ROUND_ROBIN --name pool1 --protocol HTTP --su
 sleep 10
 
 # Add load balancer members
-neutron lb-member-create --address 10.0.0.101 --protocol-port 80 pool1
-neutron lb-member-create --address 10.0.0.102 --protocol-port 80 pool1
-neutron lb-member-create --address 10.0.0.103 --protocol-port 80 pool1
+while [ $num -le 3 ]; do¬
+  neutron lb-member-create --address 10.0.0.10$num --protocol-port 80 pool1
+  sleep 5
+  num=$(( $num + 1 ))
+done
 
 sleep 5
 
@@ -64,6 +68,7 @@ neutron lb-vip-create --name vip-10.0.0.100 --protocol-port 80 --protocol HTTP -
 sleep 5
 
 # Add load balancer floating ip
+. /home/vagrant/devstack/openrc admin demo
 portid=`neutron port-list | grep 10.0.0.100 | awk '{ print $2 }'`
 neutron floatingip-create --port-id $portid --fixed-ip-address 10.0.0.100 --floating-ip-address 192.168.27.100 public
 
@@ -77,13 +82,13 @@ echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0
 echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.102' | sudo nc -l -p 80 ; done &" > /home/vagrant/http2.sh
 echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.103' | sudo nc -l -p 80 ; done &" > /home/vagrant/http3.sh
 chmod +x /home/vagrant/http*.sh
-scp -i /home/vagrant/.ssh/id_rsa /home/vagrant/http1.sh cirros@10.0.0.101:/home/cirros/http.sh
-scp -i /home/vagrant/.ssh/id_rsa /home/vagrant/http2.sh cirros@10.0.0.102:/home/cirros/http.sh
-scp -i /home/vagrant/.ssh/id_rsa /home/vagrant/http3.sh cirros@10.0.0.103:/home/cirros/http.sh
+scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http1.sh cirros@10.0.0.101:/home/cirros/http.sh
+scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http2.sh cirros@10.0.0.102:/home/cirros/http.sh
+scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http3.sh cirros@10.0.0.103:/home/cirros/http.sh
 
-ssh -i /home/vagrant/.ssh/id_rsa cirros@10.0.0.101 "/home/cirros/http.sh"
-ssh -i /home/vagrant/.ssh/id_rsa cirros@10.0.0.102 "/home/cirros/http.sh"
-ssh -i /home/vagrant/.ssh/id_rsa cirros@10.0.0.103 "/home/cirros/http.sh"
+ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.101 "/home/cirros/http.sh"
+ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.102 "/home/cirros/http.sh"
+ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.103 "/home/cirros/http.sh"
 
 # Test internal vip
 echo "Testing internal vip 10.0.0.100..."
