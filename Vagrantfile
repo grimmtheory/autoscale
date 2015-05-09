@@ -3,14 +3,12 @@
 
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
-# DEVSTACK_BRANCH = "stable/kilo"
 DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
   config.vm.box = "ubuntu/trusty64"
-  # config.vm.box = "base"
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack"
   # eth1, this will be the management endpoint
@@ -22,13 +20,13 @@ Vagrant.configure("2") do |config|
     vb.gui = true
     vb.customize ["modifyvm", :id, "--cpus", "4"]
     vb.customize ["modifyvm", :id, "--memory", 8192]
+    # eth2 must be in promiscuous mode for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
   end
 
   config.vm.provision "shell", inline: <<-EOF
     apt-get update
-    apt-get -y install git openvswitch-switch
+    apt-get install git -y
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
@@ -36,11 +34,6 @@ Vagrant.configure("2") do |config|
 HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
-
-# Speedup DevStack Install, hard set mirror
-# UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
-# UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
-# UBUNTU_INST_HTTP_PROXY="192.168.33.254:3128"
 
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
@@ -70,13 +63,18 @@ PUBLIC_NETWORK_GATEWAY=#{VM_NET}.2
 Q_FLOATING_ALLOCATION_POOL=start=#{VM_NET}.3,end=#{VM_NET}.254
 
 ## Disable unwanted services
+# Nova network
 disable_service n-net
+# Tempest services
 disable_service tempest
+# Sahara
 disable_service sahara
+# Trove services
 disable_service trove
 disable_service tr-api
 disable_service tr-mgr
 disable_service tr-cond
+# Swift services
 disable_service s-proxy
 disable_service s-object
 disable_service s-container
@@ -105,10 +103,6 @@ enable_service horizon
 enable_service g-api
 enable_service g-reg
 
-# Images
-IMAGE_URLS+=",https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-disk.img"
-# IMAGE_URLS+=,"http://cloud-images.ubuntu.com/releases/14.04/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img,http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img"
-
 # Enable Neutron
 enable_service q-svc
 enable_service q-agt
@@ -132,6 +126,7 @@ enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
 enable_service h-eng
+
 CONF
 
     # Set passwords
@@ -164,7 +159,6 @@ SYSCTL
 auto eth2
 iface eth2 inet manual
 ETH2
-
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
