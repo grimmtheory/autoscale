@@ -36,7 +36,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vb|
 
     # Lable the virtual machine
-    vb.name = devstack
+    vb.name = "devstack"
 
     # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
