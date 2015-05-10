@@ -1,6 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Some global settings for devstack local.conf
 HOST_IP = "192.168.33.2"
 VM_NET = "192.168.27"
 DEVSTACK_BRANCH = "master"
@@ -8,34 +9,57 @@ DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
-  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
   ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
+
   if Vagrant.has_plugin?("vagrant-proxyconf")
     config.proxy.http     = "http://192.168.33.254:3128"
     config.proxy.https    = "http://192.168.33.254:3128"
     config.proxy.no_proxy = "localhost,127.0.0.1"
   end
-  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
 
+  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
+
+  # Select distribution and build for the box
   config.vm.box = "ubuntu/trusty64"
+
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack"
+
   # eth1, this will be the management endpoint
   config.vm.network :private_network, ip: "#{HOST_IP}"
+
   # eth2, this will be the "public" VM network
   config.vm.network :private_network, ip: "#{VM_NET}.2", netmask: "255.255.255.0", auto_config: false
+
   # virtual-box specific settings
   config.vm.provider :virtualbox do |vb|
+
+    # Lable the virtual machine
+    vb.name = devstack
+
+    # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
-    vb.customize ["modifyvm", :id, "--cpus", "4"]
-    vb.customize ["modifyvm", :id, "--memory", 8192]
-    # eth2 must be in promiscuous mode for floating IPs to be accessible
+
+    # Limit CPU execution to prevent run over of host OS
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+
+    # Set CPU and memoru size
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--memory", 3172]
+
+    # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+
+    # Enable multi-processor, faster IO and VT-x pass-thru
+    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+
   end
 
   config.vm.provision "shell", inline: <<-EOF
 
-    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
 
     apt-get -y install avahi-utils
     apt-get -y install avahi-discover
@@ -52,7 +76,7 @@ Vagrant.configure("2") do |config|
     echo '# Acquire::http::proxy "http://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
     echo '# Acquire::https::proxy "https://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
 
-    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
 
     apt-get update
     apt-get install git -y
@@ -117,11 +141,16 @@ disable_service s-container
 disable_service s-account
 
 # Enable Cinder services
-# enable_service cinder
-# enable_service c-api
-# enable_service c-vol
-# enable_service c-sch
-# enable_service c-bak
+enable_service cinder
+enable_service c-api
+enable_service c-vol
+enable_service c-sch
+enable_service c-bak
+
+# Configure Cinder services
+VOLUME_GROUP="stack-volumes"
+VOLUME_NAME_PREFIX="volume-"
+VOLUME_BACKING_FILE_SIZE=250M
 
 # Enable Database Backend MySQL
 enable_service mysql
@@ -200,7 +229,7 @@ auto br-ex
 iface br-ex inet static
       address #{VM_NET}.2
       netmask 255.255.255.0
-      up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
+      # Not Needed - up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
 BREX
 
     # Download post.sh
