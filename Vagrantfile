@@ -41,6 +41,7 @@ Vagrant.configure("2") do |config|
     apt-get -y install avahi-discover
     apt-get -y install squidclient
 
+    export UBUNTU_INST_HTTP_PROXY=http://192.168.33.254:3142
     export HTTP_PROXY=http://192.168.33.254:3128/
     export http_proxy=$HTTP_PROXY
 
@@ -62,6 +63,13 @@ Vagrant.configure("2") do |config|
 HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
+
+# Proxy and mirror settings
+UBUNTU_INST_HTTP_PROXY=http://192.168.33.254:3142
+UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
+UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
+# UBUNTU_INST_HTTP_HOSTNAME="www.gtlib.gatech.edu"
+# UBUNTU_INST_HTTP_DIRECTORY="/pub/ubuntu"
 
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
