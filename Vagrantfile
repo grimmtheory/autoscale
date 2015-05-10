@@ -37,14 +37,19 @@ Vagrant.configure("2") do |config|
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
 
+    apt-get -y install avahi-utils
+    apt-get -y install avahi-discover
+    apt-get -y install squidclient
+
     export HTTP_PROXY=http://192.168.33.254:3128/
     export http_proxy=$HTTP_PROXY
 
     echo "export HTTP_PROXY=http://192.168.33.254:3128/" >> /home/vagrant/.bash_profile
     echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
 
-    echo 'Acquire::http::proxy "http://192.168.33.254:3128/";' > /etc/apt/apt.conf.d/95proxies
-    echo 'Acquire::https::proxy "https://192.168.33.254:3128/";' > /etc/apt/apt.conf.d/95proxies
+    echo 'Acquire::http::proxy "http://192.168.33.254:3142/";' > /etc/apt/apt.conf.d/95proxies
+    echo '# Acquire::http::proxy "http://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
+    echo '# Acquire::https::proxy "https://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
 
