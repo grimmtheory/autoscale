@@ -20,12 +20,17 @@ sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc ad
 
 sourceadmin
 
+## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+HTTP_PROXY=http://192.168.33.254:3128/
+http_proxy=$HTTP_PROXY
+
 # generate a keypair and make it available via share
 echo "Generating keypair..."
-key=/home/vagrant/mykey
+key=/home/vagrant/.ssh/id_rsa
 ssh-keygen -t rsa -N "" -f $key
-cp /home/vagrant/.ssh/mykey* /home/vagrant
-chmod +r $key $key.pub
+chown -R vagrant:vagrant /home/vagrant
+chmod 600 $key
+chmod 644 $key.pub
 
 # add the vagrant keypair and open up security groups
 echo "Adding keypair and creating security group rules..."
