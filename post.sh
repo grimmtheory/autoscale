@@ -1,4 +1,20 @@
 #!/bin/bash
+# Report stack.sh run time
+devstart=`head -n 1 /home/vagrant/devstack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
+devstop=`tail -n 9 /home/vagrant/devstack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
+startdate=$(date -u -d "$devstart" +"%s")
+enddate=$(date -u -d "$devstop" +"%s")
+runtime=`date -u -d "0 $enddate sec - $startdate sec" +"%H:%M:%S"`
+
+echo " -----------------------------"
+echo " | DEVSTACK START:  $devstart |"
+echo " | DEVSTACK STOP:   $devstop |"
+echo " -----------------------------"
+echo " | TOTAL RUN TIME:  $runtime |"
+echo " -----------------------------"
+echo ""
+
+# Source credential functions
 sourceadmin () { echo "Sourcing admin..."; source /home/vagrant/devstack/openrc admin admin; }
 sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc admin demo; }
 
