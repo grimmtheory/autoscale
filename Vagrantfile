@@ -36,10 +36,17 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-EOF
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+
     export HTTP_PROXY=http://192.168.33.254:3128/
     export http_proxy=$HTTP_PROXY
+
     echo "export HTTP_PROXY=http://192.168.33.254:3128/" >> /home/vagrant/.bash_profile
     echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
+
+    echo 'Acquire::http::proxy "http://myproxy.server.com:8080/";' > /etc/apt/apt.conf.d/95proxies
+    echo 'Acquire::ftp::proxy "ftp://myproxy.server.com:8080/";' >> /etc/apt/apt.conf.d/95proxies
+    echo 'Acquire::https::proxy "https://myproxy.server.com:8080/";' >> /etc/apt/apt.conf.d/95proxies
+
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
 
     apt-get update
