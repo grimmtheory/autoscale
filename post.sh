@@ -7,6 +7,9 @@ cd /home/vagrant
 ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/vm_key
 cp -f /home/vagrant/.ssh/vm_key /vagrant/vm_key
 cp -f /home/vagrant/.ssh/vm_key /home/vagrant/vm_key
+sudo chmod +r /home/vagrant/.ssh/vm_key
+sudo chmod +r /home/vagrant/vm_key
+sudo chmod +r /vagrant/vm_key
 
 # add the vagrant keypair and open up security groups
 cd /home/vagrant/devstack
@@ -24,6 +27,8 @@ neutron subnet-update public-subnet --dns_nameservers list=true 8.8.8.8
 neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
 
 sleep 5
+
+cd /home/vagrant/devstack; source openrc admin demo
 
 # setup web instances
 num=1
@@ -48,7 +53,7 @@ sleep 10
 
 # Add load balancer members
 num=1
-while [ $num -le 3 ]; do¬
+while [ $num -le 3 ]; do
   neutron lb-member-create --address 10.0.0.10$num --protocol-port 80 pool1
   sleep 5
   num=$(( $num + 1 ))
@@ -64,12 +69,13 @@ neutron lb-healthmonitor-associate $healthmonitorid pool1
 sleep 5
 
 # Create load balancer vip
+subnetid=`neutron subnet-list | grep " private" | awk '{ print $2 }'`
 neutron lb-vip-create --name vip-10.0.0.100 --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address 10.0.0.100 pool1
 
 sleep 5
 
 # Add load balancer floating ip
-. /home/vagrant/devstack/openrc admin demo
+cd /home/vagrant/devstack; source openrc admin demo
 portid=`neutron port-list | grep 10.0.0.100 | awk '{ print $2 }'`
 neutron floatingip-create --port-id $portid --fixed-ip-address 10.0.0.100 --floating-ip-address 192.168.27.100 public
 
@@ -80,16 +86,43 @@ echo "    StrictHostKeyChecking no" > /home/vagrant/.ssh/config
 
 # Turn on an http listener for each host
 echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.101' | sudo nc -l -p 80 ; done &" > /home/vagrant/http1.sh
+
+sleep 3
+
 echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.102' | sudo nc -l -p 80 ; done &" > /home/vagrant/http2.sh
+
+sleep 3
+
 echo "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.103' | sudo nc -l -p 80 ; done &" > /home/vagrant/http3.sh
+
+sleep 3
+
 chmod +x /home/vagrant/http*.sh
+
 scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http1.sh cirros@10.0.0.101:/home/cirros/http.sh
+
+sleep 3
+
 scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http2.sh cirros@10.0.0.102:/home/cirros/http.sh
+
+sleep 3
+
 scp -i /home/vagrant/.ssh/vm_key /home/vagrant/http3.sh cirros@10.0.0.103:/home/cirros/http.sh
 
+sleep 3
+
 ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.101 "/home/cirros/http.sh"
+
+sleep 3
+
 ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.102 "/home/cirros/http.sh"
+
+sleep 3
+
 ssh -i /home/vagrant/.ssh/vm_key cirros@10.0.0.103 "/home/cirros/http.sh"
+
+sleep 3
+
 
 # Test internal vip
 echo "Testing internal vip 10.0.0.100..."
