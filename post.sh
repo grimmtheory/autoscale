@@ -22,8 +22,9 @@ sourceadmin
 
 # generate a keypair and make it available via share
 echo "Generating keypair..."
-key=/home/vagrant/.ssh/id_rsa
+key=/home/vagrant/mykey
 ssh-keygen -t rsa -N "" -f $key
+cp /home/vagrant/.ssh/mykey* /home/vagrant
 chmod +r $key $key.pub
 
 # add the vagrant keypair and open up security groups

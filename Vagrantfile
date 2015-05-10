@@ -8,6 +8,15 @@ DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
+  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+  ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
+  if Vagrant.has_plugin?("vagrant-proxyconf")
+    config.proxy.http     = "http://192.168.33.254:3128"
+    config.proxy.https    = "http://192.168.33.254:3128"
+    config.proxy.no_proxy = "localhost,127.0.0.1"
+  end
+  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+
   config.vm.box = "ubuntu/trusty64"
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack"
@@ -25,6 +34,14 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "shell", inline: <<-EOF
+
+    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+    export HTTP_PROXY=http://192.168.33.254:3128/
+    export http_proxy=$HTTP_PROXY
+    echo "export HTTP_PROXY=http://192.168.33.254:3128/" >> /home/vagrant/.bash_profile
+    echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
+    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+
     apt-get update
     apt-get install git -y
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
