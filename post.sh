@@ -47,6 +47,7 @@ neutron lb-pool-create --lb-method ROUND_ROBIN --name pool1 --protocol HTTP --su
 sleep 10
 
 # Add load balancer members
+num=1
 while [ $num -le 3 ]; do¬
   neutron lb-member-create --address 10.0.0.10$num --protocol-port 80 pool1
   sleep 5
