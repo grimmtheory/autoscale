@@ -21,7 +21,7 @@ sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc ad
 sourceadmin
 
 ## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
-# export HTTP_PROXY=http://192.168.33.1:8889/
+# export HTTP_PROXY=http://192.168.33.1:8888/
 # export http_proxy=$HTTP_PROXY
 ## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSAY
 

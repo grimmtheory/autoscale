@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
   ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
   config.vm.box_download_insecure
   if Vagrant.has_plugin?("vagrant-proxyconf")
-   config.proxy.http     = "http://192.168.33.1:8889"
+   config.proxy.http     = "http://192.168.33.1:8888"
    config.proxy.no_proxy = "localhost,127.0.0.1"
   end
 
@@ -65,13 +65,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-EOF
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
-    export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889
-    export HTTP_PROXY=http://192.168.33.1:8889/
+    export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888
+    export HTTP_PROXY=http://192.168.33.1:8888/
     export http_proxy=$HTTP_PROXY
-    echo "export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889/" >> /home/vagrant/.ssh/bash_profile
-    echo "export HTTP_PROXY=http://192.168.33.1:8889/" >> /home/vagrant/.bash_profile
+    echo "export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888/" >> /home/vagrant/.ssh/bash_profile
+    echo "export HTTP_PROXY=http://192.168.33.1:8888/" >> /home/vagrant/.bash_profile
     echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
-    echo 'Acquire::http::proxy "http://192.168.33.1:8889/";' > /etc/apt/apt.conf.d/01proxy
+    echo 'Acquire::http::proxy "http://192.168.33.1:8888/";' > /etc/apt/apt.conf.d/01proxy
 
     apt-get update
     apt-get -y install git
@@ -103,7 +103,7 @@ LOGFILE=/home/vagrant/devstack/logs/stack.sh.log
 INSTANCES_PATH=/home/vagrant/instances
 
 # Proxy and mirror settings
-UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889
+UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888
 UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
 UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
 
