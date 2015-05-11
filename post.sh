@@ -20,6 +20,14 @@ sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc ad
 
 sourceadmin
 
+## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+
+export HTTP_PROXY=http://192.168.33.1:8888/
+export http_proxy=$HTTP_PROXY
+
+## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+
+
 # generate a keypair and make it available via share
 echo "Generating keypair..."
 key=/home/vagrant/.ssh/id_rsa
@@ -57,9 +65,12 @@ sourcedemo
 # Create script for cloud-init to use to start the web listener in the instances
 cat << HTTP > /home/vagrant/http.txt
 #!/bin/bash
+ip=`ifconfig eth0 | grep Bcast | awk '{ print $2 }' | awk -F: '{ print $2 }' | sed -e 's/ //g'`
 while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &
 HTTP
 chmod +r /home/vagrant/http.txt
+chmod +x /home/vagrant/http.txt
+chown vagrant:vagrant /home/vagrant/http.txt
 
 num=1
 while [ $num -le 3 ]; do
@@ -116,12 +127,15 @@ sleep 5
 neutron floatingip-list
 
 # Turn on an http listener for each host
-# for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
-#   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
-#   sleep 5
-# done
+for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
+  ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
+  sleep 5
+done
 
 # Testing VIPs
+# Unset http proxy (if configured)
+export HTTP_PROXY=""
+export http_proxy=""
 echo ""
 for vip in 10.0.0.100 192.168.27.100; do
   echo ""; echo "Testing $vip..."
