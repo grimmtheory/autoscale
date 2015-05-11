@@ -21,10 +21,8 @@ sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc ad
 sourceadmin
 
 ## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
-
-export HTTP_PROXY=http://192.168.33.1:8889/
-export http_proxy=$HTTP_PROXY
-
+# export HTTP_PROXY=http://192.168.33.1:8889/
+# export http_proxy=$HTTP_PROXY
 ## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
 
 
@@ -137,8 +135,8 @@ neutron floatingip-list
 
 # Testing VIPs
 # Unset http proxy (if configured)
-export HTTP_PROXY=""
-export http_proxy=""
+# export HTTP_PROXY=""
+# export http_proxy=""
 echo ""
 for vip in 10.0.0.100 192.168.27.100; do
   echo ""; echo "Testing $vip..."
