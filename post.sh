@@ -50,12 +50,20 @@ neutron subnet-show private-subnet
 neutron subnet-show public-subnet
 sleep 5
 
-# setup web instances
+# Setup web instances
 echo "Setting up web instances..."
 sourcedemo
+
+# Create script for cloud-init to use to start the web listener in the instances
+cat << HTTP > /home/vagrant/http.txt
+#!/bin/bash
+while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &
+HTTP
+chmod +r /home/vagrant/http.txt
+
 num=1
 while [ $num -le 3 ]; do
-  nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 1 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
+  nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 1 --user-data /home/vagrant/http.txt --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
   sleep 30
   nova show node$num
   num=$(( $num + 1 ))
@@ -108,10 +116,10 @@ sleep 5
 neutron floatingip-list
 
 # Turn on an http listener for each host
-for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
-  ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
-  sleep 5
-done
+# for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
+#   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
+#   sleep 5
+# done
 
 # Testing VIPs
 echo ""
