@@ -31,18 +31,18 @@ Vagrant.configure("2") do |config|
     vb.gui = true
 
     # Limit CPU execution to prevent run over of host OS
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
+    # vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
 
     # Set CPU and memoru size
-    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--cpus", "1"]
     vb.customize ["modifyvm", :id, "--memory", 4096]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
     # Enable multi-processor, faster IO and VT-x pass-thru
-    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
-    vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    # vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+    # vb.customize ["modifyvm", :id, "--ioapic", "on"]
 
   end
 
@@ -85,29 +85,40 @@ LOGFILE=/home/vagrant/devstack/logs/stack.sh.log
 INSTANCES_PATH=/home/vagrant/instances
 
 # Disable unwanted services
+# Disable nova network
 disable_service n-net
+# Disable tempest
 disable_service tempest
+# Disable sahara
 disable_service sahara
+# Disable trove
 disable_service trove
 disable_service tr-api
 disable_service tr-mgr
 disable_service tr-cond
+# Disable swift
 disable_service s-proxy
 disable_service s-object
 disable_service s-container
 disable_service s-account
+# Disable cinder
+disable_service cinder
+disable_service c-api
+disable_service c-vol
+disable_service c-sch
+disable_service c-bak
 
 # Enable Cinder services
-enable_service cinder
-enable_service c-api
-enable_service c-vol
-enable_service c-sch
-enable_service c-bak
+# enable_service cinder
+# enable_service c-api
+# enable_service c-vol
+# enable_service c-sch
+# enable_service c-bak
 
 # Configure Cinder services
-VOLUME_GROUP="stack-volumes"
-VOLUME_NAME_PREFIX="volume-"
-VOLUME_BACKING_FILE_SIZE=250M
+# VOLUME_GROUP="stack-volumes"
+# VOLUME_NAME_PREFIX="volume-"
+# VOLUME_BACKING_FILE_SIZE=250M
 
 # Enable Database Backend MySQL
 enable_service mysql
