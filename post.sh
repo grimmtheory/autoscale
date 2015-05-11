@@ -1,5 +1,5 @@
 #!/bin/bash
-# Report stack.sh run time
+# Report stack.sh run time - Stack.sh used to report run time, since they've removed that add it back
 devstart=`head -n 1 /home/vagrant/devstack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
 devstop=`tail -n 9 /home/vagrant/devstack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
 startdate=$(date -u -d "$devstart" +"%s")
@@ -14,7 +14,7 @@ echo " | TOTAL RUN TIME:  $runtime |"
 echo " -----------------------------"
 echo ""
 
-# Source credential functions
+# Source credential functions to allow easy swapping between creds as needed
 sourceadmin () { echo "Sourcing admin..."; source /home/vagrant/devstack/openrc admin admin; }
 sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc admin demo; }
 

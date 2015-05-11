@@ -69,12 +69,13 @@ Vagrant.configure("2") do |config|
     export HTTP_PROXY=http://192.168.33.254:3128/
     export http_proxy=$HTTP_PROXY
 
+    echo "export UBUNTU_INST_HTTP_PROXY=http://192.168.33.254:3142/" >> /home/vagrant/.ssh/bash_profile
     echo "export HTTP_PROXY=http://192.168.33.254:3128/" >> /home/vagrant/.bash_profile
     echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
 
-    echo 'Acquire::http::proxy "http://192.168.33.254:3142/";' > /etc/apt/apt.conf.d/95proxies
-    echo '# Acquire::http::proxy "http://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
-    echo '# Acquire::https::proxy "https://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/95proxies
+    echo 'Acquire::http::proxy "http://192.168.33.254:3142/";' > /etc/apt/apt.conf.d/01proxy
+    echo '# Acquire::http::proxy "http://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/01proxy
+    echo '# Acquire::https::proxy "https://192.168.33.254:3128/";' >> /etc/apt/apt.conf.d/01proxy
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
 
