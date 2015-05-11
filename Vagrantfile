@@ -31,11 +31,11 @@ Vagrant.configure("2") do |config|
     vb.gui = true
 
     # Limit CPU execution to prevent run over of host OS
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "50"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
 
     # Set CPU and memoru size
     vb.customize ["modifyvm", :id, "--cpus", "2"]
-    vb.customize ["modifyvm", :id, "--memory", 3172]
+    vb.customize ["modifyvm", :id, "--memory", 4096]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
