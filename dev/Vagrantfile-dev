@@ -13,8 +13,9 @@ Vagrant.configure("2") do |config|
   ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
   config.vm.box_download_insecure
   if Vagrant.has_plugin?("vagrant-proxyconf")
-   config.proxy.http     = "http://192.168.33.1:8888"
-   config.proxy.no_proxy = "localhost,127.0.0.1"
+    config.proxy.http     = "http://192.168.33.1:8889"
+    config.proxy.https    = "http://192.168.33.1:8889"
+    config.proxy.no_proxy = "localhost,127.0.0.1"
   end
 
 
@@ -40,18 +41,18 @@ Vagrant.configure("2") do |config|
     vb.gui = true
 
     # Limit CPU execution to prevent run over of host OS
-    # vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
+    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
 
     # Set CPU and memoru size
-    vb.customize ["modifyvm", :id, "--cpus", "1"]
+    vb.customize ["modifyvm", :id, "--cpus", "2"]
     vb.customize ["modifyvm", :id, "--memory", 4096]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
 
     # Enable multi-processor, faster IO and VT-x pass-thru
-    # vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
-    # vb.customize ["modifyvm", :id, "--ioapic", "on"]
+    vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
+    vb.customize ["modifyvm", :id, "--ioapic", "on"]
 
   end
 
@@ -65,16 +66,23 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-EOF
 
     ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
-    export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888
-    export HTTP_PROXY=http://192.168.33.1:8888/
+    export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889/
+    export HTTP_PROXY=http://192.168.33.1:8889/
     export http_proxy=$HTTP_PROXY
-    echo "export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888/" >> /home/vagrant/.ssh/bash_profile
-    echo "export HTTP_PROXY=http://192.168.33.1:8888/" >> /home/vagrant/.bash_profile
+    echo "export UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889/" >> /home/vagrant/.ssh/bash_profile
+    echo "export HTTP_PROXY=http://192.168.33.1:8889/" >> /home/vagrant/.bash_profile
     echo "export http_proxy=$HTTP_PROXY" >> /home/vagrant/.bash_profile
-    echo 'Acquire::http::proxy "http://192.168.33.1:8888/";' > /etc/apt/apt.conf.d/01proxy
+    echo 'Acquire::http::proxy "http://192.168.33.1:8889/";' > /etc/apt/apt.conf.d/01proxy
 
+    # Install git
     apt-get update
     apt-get -y install git
+
+    ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
+    git config --global http.proxy socks5://localhost:8889
+    git config --global http.sslVerify=false
+
+    # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
@@ -103,7 +111,7 @@ LOGFILE=/home/vagrant/devstack/logs/stack.sh.log
 INSTANCES_PATH=/home/vagrant/instances
 
 # Proxy and mirror settings
-UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8888
+UBUNTU_INST_HTTP_PROXY=http://192.168.33.1:8889
 UBUNTU_INST_HTTP_HOSTNAME="archive.ubuntu.com"
 UBUNTU_INST_HTTP_DIRECTORY="/ubuntu"
 
@@ -233,15 +241,9 @@ iface br-ex inet static
       # Not Needed - up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
 BREX
 
-    # Download post.sh
+    # Begin post tasks
     cd /home/vagrant
-    wget https://raw.githubusercontent.com/grimmtheory/autoscale/master/post.sh
-    chmod +x ./post.sh
-    chown -R vagrant:vagrant /home/vagrant
 
-    # Execute post.sh
-    chmod +x ./post.sh
-    ./post.sh
 
     EOF
 

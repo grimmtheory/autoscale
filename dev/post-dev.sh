@@ -20,6 +20,11 @@ sourcedemo () { echo "Sourcing demo..."; source /home/vagrant/devstack/openrc ad
 
 sourceadmin
 
+## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSARY
+# export HTTP_PROXY=http://192.168.33.1:8888/
+# export http_proxy=$HTTP_PROXY
+## SET PROXY TO SPEED UP BUILDS, REMOVE OR CONFIGURE AS NECESSAY
+
 # generate a keypair and make it available via share
 echo "Generating keypair..."
 key=/home/vagrant/.ssh/id_rsa
@@ -55,18 +60,35 @@ echo "Setting up web instances..."
 sourcedemo
 
 # Create script for cloud-init to use to start the web listener in the instances
+cat << HTTP > /home/vagrant/http$num.sh
+#!/bin/sh
+ip=`ifconfig eth0 | grep Bcast | awk '{ print $2 }' | awk -F: '{ print $2 }' | sed -e 's/ //g'`
+while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &
+HTTP
+chmod +rx /home/vagrant/http$num.sh; chown vagrant:vagrant /home/vagrant/http$num.sh
 
 # Create custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
 nova flavor-create --is-public true m1.micro 6 128 1 1
 
 # Spawn instances
 num=1
+
 while [ $num -le 3 ]; do
-  nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
-  sleep 30
-  nova show node$num
-  num=$(( $num + 1 ))
+
+cat << HTTP > /home/vagrant/http$num.sh
+#!/bin/sh
+while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.10$num' | sudo nc -l -p 80 ; done &
+HTTP
+
+chmod +rx /home/vagrant/http$num.sh; chown vagrant:vagrant /home/vagrant/http$num.sh
+
+nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --user-data /home/vagrant/http$num.sh --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
+sleep 30
+nova show node$num
+num=$(( $num + 1 ))
+
 done
+
 nova list
 
 # Create load balancer pool
@@ -121,6 +143,9 @@ for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
 done
 
 # Testing VIPs
+# Unset http proxy (if configured)
+export HTTP_PROXY=""
+export http_proxy=""
 echo ""
 for vip in 10.0.0.100 192.168.27.100; do
   echo ""; echo "Testing $vip..."
