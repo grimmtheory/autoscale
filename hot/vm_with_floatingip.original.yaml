@@ -1,0 +1,49 @@
+heat_template_version: 2013-05-23
+parameters:
+  key_name:
+    type: string
+    default: sc-key
+  node_name:
+    type: string
+    default: lb-vm
+  node_server_flavor:
+    type: string
+    default: Micro-Small
+  node_image_name:
+    type: string
+    default: cirros-0.3.2-x86_64
+  floating_net_id:
+    type: string
+    default: 14dcb930-2e70-4847-8fe3-91e014947c2a
+  private_net_id:
+    type: string
+    default: c638c170-a87d-4999-9bd6-241695513fcc
+  private_subnet_id:
+    type: string
+    default: 6ec5f729-763d-4cec-b5d6-3d7fb74f3890
+
+
+resources:
+
+  vm_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+
+  vm_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: floating_net_id }
+      port_id: { get_resource: vm_port }
+
+  vm_instance:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node_name }
+      image: { get_param: node_image_name }
+      flavor: { get_param: node_server_flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: vm_port }
