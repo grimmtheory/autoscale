@@ -1,27 +1,42 @@
+#!/bin/bash
+
+# Source credentials
+source /home/vagrant/devstack/openrc admin demo
+
+# Set variables
+outputfile=`echo ${0##*/} | sed -e 's/.sh//g'`.yaml
+for object in public private; do
+  $objectnetwork=`neutron net-list | grep $object | awk '{ print $2 }'`
+  echo "$objectnetwork guid = $objectnetwork"
+  $objectsubnet=`neutron subnet-list | grep $object | awk '{ print $2 }'`
+  echo "$objectsubnet guid = $objectsubnet"
+done
+
+# Create template
+cat << HOT > $outputfile
 heat_template_version: 2013-05-23
 parameters:
   key_name:
     type: string
-    default: sc-key
+    default: vm_key
   node_name:
     type: string
     default: lb-vm
   node_server_flavor:
     type: string
-    default: Micro-Small
+    default: m1.tiny
   node_image_name:
     type: string
-    default: cirros-0.3.2-x86_64
+    default: cirros-0.3.4-x86_64-uec
   floating_net_id:
     type: string
-    default: 14dcb930-2e70-4847-8fe3-91e014947c2a
+    default: $publicnetwork
   private_net_id:
     type: string
-    default: c638c170-a87d-4999-9bd6-241695513fcc
+    default: $privatenetwork
   private_subnet_id:
     type: string
-    default: 6ec5f729-763d-4cec-b5d6-3d7fb74f3890
-
+    default: $privatesubnet
 
 resources:
 
@@ -47,3 +62,4 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: vm_port }
+HOT
