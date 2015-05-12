@@ -1,0 +1,45 @@
+heat_template_version: 2014-10-16
+parameters:
+  floating_net_id:
+    type: string
+    default: 8f3508a9-d4f5-4f9c-a5da-fd7f04059303
+  private_subnet_id:
+    type: string
+    default: d53a30db-9e9d-4841-a115-ff22746a39f5
+
+resources:
+  monitor:
+    type: OS::Neutron::HealthMonitor
+    properties:
+      type: TCP
+      delay: 3
+      max_retries: 5
+      timeout: 3
+
+  pool:
+    type: OS::Neutron::Pool
+    properties:
+      protocol: HTTP
+      monitors: [{get_resource: monitor}]
+      subnet_id: { get_param: private_subnet_id }
+      lb_method: ROUND_ROBIN
+      vip:
+        protocol_port: 80
+
+  load_balancer:
+    type: OS::Neutron::LoadBalancer
+    properties:
+      protocol_port: 80
+      pool_id: {get_resource: pool}
+
+  vip_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: floating_net_id }
+
+  vip_floating_assoc:
+    type: OS::Neutron::FloatingIPAssociation
+    properties:
+      floatingip_id: { get_resource: vip_floating_ip }
+      port_id: { get_attr: [ pool, vip, port_id ] }
+      fixed_ip_address: { get_attr: [ pool, vip, address ] }
