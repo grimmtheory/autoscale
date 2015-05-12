@@ -12,9 +12,9 @@ image=cirros-0.3.4-x86_64-uec
 node_name=stacknode
 
 private_network=`neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
-private_subnet=`neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
+private_subnet=`neutron subnet-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
 
-public_network=`neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
+public_network=`neutron net-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
 public_subnet=`neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
 
 # Create template
