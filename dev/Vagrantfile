@@ -11,19 +11,29 @@ Vagrant.configure("2") do |config|
 
   ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
   ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
-  config.vm.box_download_insecure
-  if Vagrant.has_plugin?("vagrant-proxyconf")
-    config.proxy.http       = 'http://192.168.34.1:8888'
-    config.proxy.https      = 'DIRECT'
-    config.apt_proxy.http   = 'http://192.168.34.1:8888'
-    config.apt_proxy.https  = 'DIRECT'
-    config.git_proxy.http   = 'http://192.168.34.1:8888'
-    config.git_proxy.httpS  = 'DIRECT'
-    config.proxy.no_proxy   = 'localhost,127.0.0.1'
-  end
+  # config.vm.box_download_insecure
+  # if Vagrant.has_plugin?("vagrant-proxyconf")
+  #   config.proxy.http       = "http://192.168.34.1:8888/"
+  #   config.proxy.https      = "DIRECT"
+  #   config.apt_proxy.http   = "http://192.168.34.1:8888/"
+  #   config.apt_proxy.https  = "DIRECT"
+  #   config.git_proxy.http   = "http://192.168.34.1:8888/"
+  #   config.git_proxy.https  = "DIRECT"
+  #   config.proxy.no_proxy   = "localhost,127.0.0.1"
+  # end
 
   # Select distribution and build for the box
   config.vm.box = "ubuntu/trusty64"
+
+  # Utilize apt caching if plugin is present
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.scope = :box
+    config.cache.synced_folder_opts = {
+      type: :nfs,
+      mount_options: ['rw', 'vers=3', 'tcp', 'nolock']
+      # mount_options: ['rw', 'vers=4', 'tcp']
+    }
+  end
 
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack-dev"
