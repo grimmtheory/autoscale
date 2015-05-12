@@ -2,10 +2,10 @@ heat_template_version: 2013-05-23
 parameters:
   key_name:
     type: string
-    default: vm_key
+    default: vagrant
   node_name:
     type: string
-    default: lb-vm
+    default: stacknode
   node_server_flavor:
     type: string
     default: m1.tiny
@@ -14,13 +14,13 @@ parameters:
     default: cirros-0.3.4-x86_64-uec
   floating_net_id:
     type: string
-    default: 
+    default: dd06fd4d-5538-4b77-a394-9db624a10275
   private_net_id:
     type: string
-    default: 
+    default: dd06fd4d-5538-4b77-a394-9db624a10275
   private_subnet_id:
     type: string
-    default: 
+    default: 10f5b2eb-2696-460c-acc4-70f7c169efd4
 
 resources:
 
