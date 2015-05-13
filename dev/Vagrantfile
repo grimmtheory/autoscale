@@ -3,10 +3,9 @@
 
 # Some global settings for devstack local.conf
 HOST_IP = "192.168.34.2"
-PUB_NET = "192.168.28"
-PRIV_NET = "10.1.0"
+PUBLIC_NETWORK = "192.168.28"
+PRIVATE_NETWORK = "10.1.0"
 DNS = "10.0.2.3"
-NETMASK = "255.255.255.0"
 
 IMAGE = "cirros-0.3.4-x86_64-uec"
 FLAVOR_NAME = "m1.micro"
@@ -27,7 +26,7 @@ Vagrant.configure("2") do |config|
   config.vm.network :private_network, ip: "#{HOST_IP}"
 
   # eth2, this will be the "public" VM network
-  config.vm.network :private_network, ip: "#{PUB_NET}.2", netmask: "#{NETMASK}", auto_config: false
+  config.vm.network :private_network, ip: "#{PUBLIC_NETWORK}.2", netmask: "255.255.255.0", auto_config: false
 
   # virtual-box specific settings
   config.vm.provider :virtualbox do |vb|
@@ -162,10 +161,10 @@ enable_service neutron
 # Configure Neutron
 FLAT_INTERFACE=eth2
 PUBLIC_INTERFACE=eth2
-FIXED_RANGE=#{PRIV_NET}.0/24
-FLOATING_RANGE=#{PUB_NET}.0/24
-PUBLIC_NETWORK_GATEWAY=#{PUB_NET}.2
-Q_FLOATING_ALLOCATION_POOL=start=#{PUB_NET}.3,end=#{PUB_NET}.254
+FIXED_RANGE=#{PRIVATE_NETWORK}.0/24
+FLOATING_RANGE=#{PUBLIC_NETWORK}.0/24
+PUBLIC_NETWORKWORK_GATEWAY=#{PUBLIC_NETWORK}.2
+Q_FLOATING_ALLOCATION_POOL=start=#{PUBLIC_NETWORK}.3,end=#{PUBLIC_NETWORK}.254
 
 # Enable Ceilometer - Metering Service (metering + alarming)
 enable_service ceilometer-collector
@@ -219,9 +218,9 @@ ETH2
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
-      address #{PUB_NET}.2
-      netmask #{NETMASK}
-      ip route add #{PRIV_NET}.0/24 via #{PUB_NET}.3 dev br-ex
+      address #{PUBLIC_NETWORK}.2
+      netmask 255.255.255.0
+      ip route add #{PRIVATE_NETWORK}.0/24 via #{PUBLIC_NETWORK}.3 dev br-ex
 BREX
 
     # Begin post tasks
@@ -292,12 +291,12 @@ while [ $num -le 3 ]; do
 cat << HTTP > /home/vagrant/http$num.sh
 #!/bin/sh
 touch ~/cloud-init.test
-while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to #{PRIV_NET}.10$num' | sudo nc -l -p 80 ; done &
+while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to #{PRIVATE_NETWORK}.10$num' | sudo nc -l -p 80 ; done &
 HTTP
 
 chmod +rx /home/vagrant/http$num.sh; chown vagrant:vagrant /home/vagrant/http$num.sh
 
-nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor #{FLAVOR_ID} --user-data /home/vagrant/http$num.sh --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=#{PRIV_NET}.10$num --key-name vagrant node$num
+nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor #{FLAVOR_ID} --user-data /home/vagrant/http$num.sh --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=#{PRIVATE_NETWORK}.10$num --key-name vagrant node$num
 sleep 30
 nova show node$num
 num=$(( $num + 1 ))
@@ -319,7 +318,7 @@ echo "Adding load balancer pool members"
 sourcedemo
 num=1
 while [ $num -le 3 ]; do
-  neutron lb-member-create --address #{PRIV_NET}.10$num --protocol-port 80 pool1
+  neutron lb-member-create --address #{PRIVATE_NETWORK}.10$num --protocol-port 80 pool1
   sleep 5
   num=$(( $num + 1 ))
 done
@@ -339,27 +338,27 @@ neutron lb-healthmonitor-list
 echo "Creating load balancer vip..."
 sourcedemo
 subnetid=`neutron subnet-list | grep " private" | awk '{ print $2 }'`
-neutron lb-vip-create --name #{PRIV_NET}.100 --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address #{PRIV_NET}.100 pool1
+neutron lb-vip-create --name #{PRIVATE_NETWORK}.100 --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address #{PRIVATE_NETWORK}.100 pool1
 sleep 5
 neutron lb-vip-list
 
 # Add load balancer floating ip
 echo "Adding floating ip to load balancer..."
 sourcedemo
-portid=`neutron port-list | grep #{PRIV_NET}.100 | awk '{ print $2 }'`
-neutron floatingip-create --port-id $portid --fixed-ip-address #{PRIV_NET}.100 --floating-ip-address "#{PUB_NET}.100" public
+portid=`neutron port-list | grep #{PRIVATE_NETWORK}.100 | awk '{ print $2 }'`
+neutron floatingip-create --port-id $portid --fixed-ip-address #{PRIVATE_NETWORK}.100 --floating-ip-address "#{PUBLIC_NETWORK}.100" public
 sleep 5
 neutron floatingip-list
 
 # Turn on an http listener for each host
-for ip in #{PRIV_NET}.101 #{PRIV_NET}.102 #{PRIV_NET}.103; do
+for ip in #{PRIVATE_NETWORK}.101 #{PRIVATE_NETWORK}.102 #{PRIVATE_NETWORK}.103; do
   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
   sleep 5
 done
 
 # Testing VIPs
 echo ""
-for vip in #{PRIV_NET}.100 #{PUB_NET}.100; do
+for vip in #{PRIVATE_NETWORK}.100 #{PUBLIC_NETWORK}.100; do
   echo ""; echo "Testing $vip..."
   num=1
   while [[ num++ -lt 6 ]]; do

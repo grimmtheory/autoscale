@@ -3,6 +3,7 @@
 
 # Some global settings for devstack local.conf
 HOST_IP = "192.168.33.2"
+DNS = "10.0.2.3"
 VM_NET = "192.168.27"
 DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
@@ -260,8 +261,8 @@ done
 # use the google dns server as a sane default
 echo "Adding DNS servers to subnets..."
 sourceadmin
-neutron subnet-update public-subnet --dns_nameservers list=true 8.8.8.8
-neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
+neutron subnet-update public-subnet --dns_nameservers list=true #{DNS}
+neutron subnet-update private-subnet --dns_nameservers list=true #{DNS}
 neutron subnet-list
 neutron subnet-show private-subnet
 neutron subnet-show public-subnet
@@ -272,7 +273,7 @@ echo "Setting up web instances..."
 sourcedemo
 
 # Create custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
-nova flavor-create --is-public true m1.micro 6 128 1 1
+nova flavor-create --is-public true m1.micro 6 64 1 1
 
 # Spawn instances
 num=1
