@@ -98,7 +98,7 @@ Result: Verify the relevant resources get created.
 - neutron floatingip-list | grep <address field from the output from lb-vip-show>
 ```
 
-The floatingip should be pingable.  A ```curl -X GET http://<floating-vip\>``` should yeild a "503 Service Not Available" message
+The floatingip should be pingable.  A ```curl -X GET http://<floating-vip>``` should yeild a "503 Service Not Available" message
 
 Part 2:
 
@@ -116,7 +116,7 @@ resource_registry:
 Usage:
 
 ```
-heat stack-create simple-stack -f simple-scale.yaml -e environment.yaml --parameters \
+heat stack-create ha-servers -f ha-servers.yaml -e environment.yaml --parameters \
 "key_name=<key_name>\
 ;node_name=<node_name>\
 ;node_server_flavor=<node_server_flavor>\
