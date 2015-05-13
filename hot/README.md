@@ -124,7 +124,8 @@ heat stack-create ha-servers -f ha-servers.yaml -e environment.yaml --parameters
 ;floating_net_id=<floating_net_id>;\
 ;private_net_id=<private_net_id>;\
 ;private_subnet_id=<private_subnet_id>;\
-;pool_id=<pool_id>"
+;pool_id=<pool_id>\
+;initial_capacity=<initial-number-of-members>"
 ```
 
 Result:  

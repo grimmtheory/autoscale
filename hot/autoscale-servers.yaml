@@ -24,15 +24,12 @@ parameters:
   pool_id:
     type: string
     default: c7d13ae7-a160-4253-b0f2-09b8c15c3b6b
-  initial_capacity:
-    type: number
-    default: 2
 
 resources:
   web_scaler:
     type: OS::Heat::AutoScalingGroup
     properties:
-      desired_capacity: {get_param: initial_capacity}
+      cooldown: 60
       max_size: 3
       min_size: 1
       resource:
@@ -45,3 +42,41 @@ resources:
           private_net_id: {get_param: private_net_id}
           private_subnet_id: {get_param: private_subnet_id}
           pool_id: {get_param: pool_id}
+
+  scaleup_policy:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      adjustment_type: change_in_capacity
+      auto_scaling_group_id: { get_resource: web_scaler }
+      cooldown: 60
+      scaling_adjustment: 1
+
+  scaledown_policy:
+    type: OS::Heat::ScalingPolicy
+    properties:
+      adjustment_type: change_in_capacity
+      auto_scaling_group_id: { get_resource: web_scaler }
+      cooldown: 60
+      scaling_adjustment: -1
+
+  cpu_alarm_high:
+    type: OS::Ceilometer::Alarm
+    properties:
+      meter_name: network.services.lb.total.connections.rate
+      statistic: count
+      period: 60
+      threshold: 10
+      alarm_actions:
+        - {get_attr: [scaleup_policy, alarm_url]}
+      comparison_operator: gt
+
+  cpu_alarm_low:
+    type: OS::Ceilometer::Alarm
+    properties:
+      meter_name: network.services.lb.total.connections.rate
+      statistic: count
+      period: 60
+      threshold: 5
+      alarm_actions:
+        - {get_attr: [scaledown_policy, alarm_url]}
+      comparison_operator: lt
