@@ -8,4 +8,4 @@ resources:
       max_size: 3
       min_size: 1
       resource:
-        type: OS::Nova::Server::LBServer
+        type: OS::Nova::Server::Simple
