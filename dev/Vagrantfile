@@ -9,31 +9,8 @@ DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
-  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
-  ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
-  # config.vm.box_download_insecure
-  # if Vagrant.has_plugin?("vagrant-proxyconf")
-  #   config.proxy.http       = "http://192.168.34.1:8888/"
-  #   config.proxy.https      = "DIRECT"
-  #   config.apt_proxy.http   = "http://192.168.34.1:8888/"
-  #   config.apt_proxy.https  = "DIRECT"
-  #   config.git_proxy.http   = "http://192.168.34.1:8888/"
-  #   config.git_proxy.https  = "DIRECT"
-  #   config.proxy.no_proxy   = "localhost,127.0.0.1"
-  # end
-
   # Select distribution and build for the box
   config.vm.box = "ubuntu/trusty64"
-
-  # Utilize apt caching if plugin is present
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-    config.cache.synced_folder_opts = {
-      type: :nfs,
-      mount_options: ['rw', 'vers=3']
-      # mount_options: ['rw', 'vers=4', 'tcp']
-    }
-  end
 
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack-dev"
@@ -53,19 +30,12 @@ Vagrant.configure("2") do |config|
     # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
 
-    # Limit CPU execution to prevent run over of host OS
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
-
     # Set CPU and memoru size
-    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--cpus", "1"]
     vb.customize ["modifyvm", :id, "--memory", 4096]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-
-    # Enable multi-processor, faster IO and VT-x pass-thru
-    # vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
-    # vb.customize ["modifyvm", :id, "--ioapic", "on"]
 
   end
 
@@ -78,7 +48,11 @@ Vagrant.configure("2") do |config|
 
     # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
+
+    # Clone the autoscale repo
     git clone https://github.com/grimmtheory/autoscale.git /home/vagrant/autoscale
+
+    # Configure devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
@@ -192,7 +166,6 @@ enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
 enable_service h-eng
-
 CONF
 
     # Set passwords
@@ -263,9 +236,7 @@ sourceadmin
 echo "Generating keypair..."
 key=/home/vagrant/.ssh/id_rsa
 ssh-keygen -t rsa -N "" -f $key
-chown -R vagrant:vagrant /home/vagrant
-chmod 600 $key
-chmod 644 $key.pub
+chown -R vagrant:vagrant /home/vagrant; chmod 600 $key; chmod 644 $key.pub
 
 # add the vagrant keypair and open up security groups
 echo "Adding keypair and creating security group rules..."
@@ -273,6 +244,7 @@ cd /home/vagrant/devstack
 for user in admin demo; do
   source openrc $user $user
   nova keypair-add --pub-key $key.pub vagrant
+  nova secgroup-add-rule default udp 1 65535 0.0.0.0
   nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
   nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
   nova secgroup-add-rule default tcp 80 80 0.0.0.0/0
@@ -369,9 +341,6 @@ for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
 done
 
 # Testing VIPs
-# Unset http proxy (if configured)
-export http_proxy=""
-export https_proxy=""
 echo ""
 for vip in 10.0.0.100 192.168.27.100; do
   echo ""; echo "Testing $vip..."
