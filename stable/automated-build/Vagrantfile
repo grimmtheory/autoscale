@@ -48,10 +48,17 @@ Vagrant.configure("2") do |config|
   # Begin in-line script
   config.vm.provision "shell", inline: <<-EOF
 
+    # Install git
     apt-get update
     apt-get -y install git
+
+    # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
+
+    # Clone the autoscale repo
     git clone https://github.com/grimmtheory/autoscale.git /home/vagrant/autoscale
+
+    # Configure devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
@@ -207,6 +214,9 @@ iface br-ex inet static
       up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
 BREX
 
+    # Begin post tasks
+    cd /home/vagrant
+
 # Report stack.sh run time - Stack.sh used to report run time, since they've removed that add it back
 devstart=`head -n 1 /home/vagrant/devstack/logs/stack.sh.log | awk '{ print $2 }' | cut -d . -f 1`
 devstop=`tail -n 9 /home/vagrant/devstack/logs/stack.sh.log | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
@@ -260,16 +270,22 @@ sleep 5
 # Setup web instances
 echo "Setting up web instances..."
 sourcedemo
+
 # Create custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
 nova flavor-create --is-public true m1.micro 6 128 1 1
+
 # Spawn instances
 num=1
+
 while [ $num -le 3 ]; do
-  nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
-  sleep 30
-  nova show node$num
-  num=$(( $num + 1 ))
+
+nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
+sleep 30
+nova show node$num
+num=$(( $num + 1 ))
+
 done
+
 nova list
 
 # Create load balancer pool
@@ -333,5 +349,7 @@ for vip in 10.0.0.100 192.168.27.100; do
     echo "Testing http to $vip...returns...$ip"
   done
 done
-EOF
+
+    EOF
+
 end

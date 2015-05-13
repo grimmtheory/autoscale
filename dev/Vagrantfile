@@ -3,37 +3,22 @@
 
 # Some global settings for devstack local.conf
 HOST_IP = "192.168.34.2"
-VM_NET = "192.168.28"
+PUB_NET = "192.168.28"
+PRIV_NET = "10.1.0"
+DNS = "10.0.2.3"
+NETMASK = "255.255.255.0"
+
+IMAGE = "cirros-0.3.4-x86_64-uec"
+FLAVOR_NAME = "m1.micro"
+FLAVOR_ID = "6"
+
 DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
 
 Vagrant.configure("2") do |config|
 
-  ### PROXY CONFIGURATION FOR FASTER BUILDS, REMOVE OR CONFIGURE AS NECESSARY ###
-  ### To use this plugin run $ vagrant plugin install vagrant-proxyconf
-  # config.vm.box_download_insecure
-  # if Vagrant.has_plugin?("vagrant-proxyconf")
-  #   config.proxy.http       = "http://192.168.34.1:8888/"
-  #   config.proxy.https      = "DIRECT"
-  #   config.apt_proxy.http   = "http://192.168.34.1:8888/"
-  #   config.apt_proxy.https  = "DIRECT"
-  #   config.git_proxy.http   = "http://192.168.34.1:8888/"
-  #   config.git_proxy.https  = "DIRECT"
-  #   config.proxy.no_proxy   = "localhost,127.0.0.1"
-  # end
-
   # Select distribution and build for the box
   config.vm.box = "ubuntu/trusty64"
-
-  # Utilize apt caching if plugin is present
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-    config.cache.synced_folder_opts = {
-      type: :nfs,
-      mount_options: ['rw', 'vers=3']
-      # mount_options: ['rw', 'vers=4', 'tcp']
-    }
-  end
 
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "devstack-dev"
@@ -42,7 +27,7 @@ Vagrant.configure("2") do |config|
   config.vm.network :private_network, ip: "#{HOST_IP}"
 
   # eth2, this will be the "public" VM network
-  config.vm.network :private_network, ip: "#{VM_NET}.2", netmask: "255.255.255.0", auto_config: false
+  config.vm.network :private_network, ip: "#{PUB_NET}.2", netmask: "#{NETMASK}", auto_config: false
 
   # virtual-box specific settings
   config.vm.provider :virtualbox do |vb|
@@ -53,19 +38,12 @@ Vagrant.configure("2") do |config|
     # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
 
-    # Limit CPU execution to prevent run over of host OS
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "80"]
-
     # Set CPU and memoru size
-    vb.customize ["modifyvm", :id, "--cpus", "2"]
+    vb.customize ["modifyvm", :id, "--cpus", "1"]
     vb.customize ["modifyvm", :id, "--memory", 4096]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
-
-    # Enable multi-processor, faster IO and VT-x pass-thru
-    # vb.customize ["modifyvm", :id, "--hwvirtex", "on"]
-    # vb.customize ["modifyvm", :id, "--ioapic", "on"]
 
   end
 
@@ -78,7 +56,11 @@ Vagrant.configure("2") do |config|
 
     # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
+
+    # Clone the autoscale repo
     git clone https://github.com/grimmtheory/autoscale.git /home/vagrant/autoscale
+
+    # Configure devstack
     cd /home/vagrant/devstack
     cat << CONF > /home/vagrant/devstack/local.conf
 [[local|localrc]]
@@ -86,9 +68,14 @@ HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
+# Force meta data service to a specific nic and enable dhcp options
 EXTRA_OPTS=(metadata_host=$HOST_IP)
 Q_DHCP_EXTRA_DEFAULT_OPTS=(enable_metadata_network=True enable_isolated_metadata=True)
 
+# Force IPv4 only
+IP_VERSION=4
+
+# Select branch
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
 NEUTRON_BRANCH=#{DEVSTACK_BRANCH}
@@ -96,6 +83,9 @@ GLANCE_BRANCH=#{DEVSTACK_BRANCH}
 CINDER_BRANCH=#{DEVSTACK_BRANCH}
 HEAT_BRANCH=#{DEVSTACK_BRANCH}
 HORIZON_BRANCH=#{DEVSTACK_BRANCH}
+CEILOMETER_BRANCH=#{DEVSTACK_BRANCH}
+TROVE_BRANCH=#{DEVSTACK_BRANCH}
+SAHARA_BRANCH=#{DEVSTACK_BRANCH}
 
 # Default passwords
 ADMIN_PASSWORD=#{DEVSTACK_PASSWORD}
@@ -172,10 +162,10 @@ enable_service neutron
 # Configure Neutron
 FLAT_INTERFACE=eth2
 PUBLIC_INTERFACE=eth2
-FIXED_RANGE=10.0.0.0/24
-FLOATING_RANGE=#{VM_NET}.0/24
-PUBLIC_NETWORK_GATEWAY=#{VM_NET}.2
-Q_FLOATING_ALLOCATION_POOL=start=#{VM_NET}.3,end=#{VM_NET}.254
+FIXED_RANGE=#{PRIV_NET}.0/24
+FLOATING_RANGE=#{PUB_NET}.0/24
+PUBLIC_NETWORK_GATEWAY=#{PUB_NET}.2
+Q_FLOATING_ALLOCATION_POOL=start=#{PUB_NET}.3,end=#{PUB_NET}.254
 
 # Enable Ceilometer - Metering Service (metering + alarming)
 enable_service ceilometer-collector
@@ -192,7 +182,6 @@ enable_service h-api
 enable_service h-api-cfn
 enable_service h-api-cw
 enable_service h-eng
-
 CONF
 
     # Set passwords
@@ -230,9 +219,9 @@ ETH2
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
-      address #{VM_NET}.2
-      netmask 255.255.255.0
-      ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
+      address #{PUB_NET}.2
+      netmask #{NETMASK}
+      ip route add #{PRIV_NET}.0/24 via #{PUB_NET}.3 dev br-ex
 BREX
 
     # Begin post tasks
@@ -263,9 +252,7 @@ sourceadmin
 echo "Generating keypair..."
 key=/home/vagrant/.ssh/id_rsa
 ssh-keygen -t rsa -N "" -f $key
-chown -R vagrant:vagrant /home/vagrant
-chmod 600 $key
-chmod 644 $key.pub
+chown -R vagrant:vagrant /home/vagrant; chmod 600 $key; chmod 644 $key.pub
 
 # add the vagrant keypair and open up security groups
 echo "Adding keypair and creating security group rules..."
@@ -273,6 +260,7 @@ cd /home/vagrant/devstack
 for user in admin demo; do
   source openrc $user $user
   nova keypair-add --pub-key $key.pub vagrant
+  nova secgroup-add-rule default udp 1 65535 0.0.0.0
   nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
   nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
   nova secgroup-add-rule default tcp 80 80 0.0.0.0/0
@@ -282,8 +270,8 @@ done
 # use the google dns server as a sane default
 echo "Adding DNS servers to subnets..."
 sourceadmin
-neutron subnet-update public-subnet --dns_nameservers list=true 8.8.8.8
-neutron subnet-update private-subnet --dns_nameservers list=true 8.8.8.8
+neutron subnet-update public-subnet --dns_nameservers list=true #{DNS}
+neutron subnet-update private-subnet --dns_nameservers list=true #{DNS}
 neutron subnet-list
 neutron subnet-show private-subnet
 neutron subnet-show public-subnet
@@ -294,7 +282,7 @@ echo "Setting up web instances..."
 sourcedemo
 
 # Create custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
-nova flavor-create --is-public true m1.micro 6 128 1 1
+nova flavor-create --is-public true #{FLAVOR_NAME} 6 128 1 1
 
 # Spawn instances
 num=1
@@ -303,12 +291,13 @@ while [ $num -le 3 ]; do
 
 cat << HTTP > /home/vagrant/http$num.sh
 #!/bin/sh
-while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to 10.0.0.10$num' | sudo nc -l -p 80 ; done &
+touch ~/cloud-init.test
+while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to #{PRIV_NET}.10$num' | sudo nc -l -p 80 ; done &
 HTTP
 
 chmod +rx /home/vagrant/http$num.sh; chown vagrant:vagrant /home/vagrant/http$num.sh
 
-nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --user-data /home/vagrant/http$num.sh --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=10.0.0.10$num --key-name vagrant node$num
+nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor #{FLAVOR_ID} --user-data /home/vagrant/http$num.sh --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip=#{PRIV_NET}.10$num --key-name vagrant node$num
 sleep 30
 nova show node$num
 num=$(( $num + 1 ))
@@ -330,7 +319,7 @@ echo "Adding load balancer pool members"
 sourcedemo
 num=1
 while [ $num -le 3 ]; do
-  neutron lb-member-create --address 10.0.0.10$num --protocol-port 80 pool1
+  neutron lb-member-create --address #{PRIV_NET}.10$num --protocol-port 80 pool1
   sleep 5
   num=$(( $num + 1 ))
 done
@@ -350,30 +339,27 @@ neutron lb-healthmonitor-list
 echo "Creating load balancer vip..."
 sourcedemo
 subnetid=`neutron subnet-list | grep " private" | awk '{ print $2 }'`
-neutron lb-vip-create --name vip-10.0.0.100 --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address 10.0.0.100 pool1
+neutron lb-vip-create --name #{PRIV_NET}.100 --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address #{PRIV_NET}.100 pool1
 sleep 5
 neutron lb-vip-list
 
 # Add load balancer floating ip
 echo "Adding floating ip to load balancer..."
 sourcedemo
-portid=`neutron port-list | grep 10.0.0.100 | awk '{ print $2 }'`
-neutron floatingip-create --port-id $portid --fixed-ip-address 10.0.0.100 --floating-ip-address 192.168.27.100 public
+portid=`neutron port-list | grep #{PRIV_NET}.100 | awk '{ print $2 }'`
+neutron floatingip-create --port-id $portid --fixed-ip-address #{PRIV_NET}.100 --floating-ip-address "#{PUB_NET}.100" public
 sleep 5
 neutron floatingip-list
 
 # Turn on an http listener for each host
-for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
+for ip in #{PRIV_NET}.101 #{PRIV_NET}.102 #{PRIV_NET}.103; do
   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
   sleep 5
 done
 
 # Testing VIPs
-# Unset http proxy (if configured)
-export http_proxy=""
-export https_proxy=""
 echo ""
-for vip in 10.0.0.100 192.168.27.100; do
+for vip in #{PRIV_NET}.100 #{PUB_NET}.100; do
   echo ""; echo "Testing $vip..."
   num=1
   while [[ num++ -lt 6 ]]; do
