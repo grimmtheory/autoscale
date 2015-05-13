@@ -16,21 +16,23 @@ Lab 1:
 ------
 The objective of this lab is to spin up # number of VMs as part of a ScalingGroup definition.
 
-heat\_template_version: 2014-10-16
+```
+heat_template_version: 2014-10-16
 resources:
   group:
     type: OS::Heat::AutoScalingGroup
     properties:
 	...
-	...
-      resource:
+    resource:
         type: OS::Nova::Server::Simple
-        
+```
+    
 The resource type OS::Nova::Server::Simple is declared in the environment.yaml template
 
+```
 resource_registry:
     "OS::Nova::Server::Simple": "simple-server.yaml"
-    
+```    
 The simple-server.yaml itself comprises of a hot template that takes in parameters required -
 
 - Spawn a customized VM
@@ -42,18 +44,28 @@ The simple-server.yaml itself comprises of a hot template that takes in paramete
 
 Usage:
 
-heat stack-create simple-stack -f simple-scale.yaml -e environment.yaml --parameters 
-"key\_name=\<key\_name\>; node\_name=\<node\_name\>; node\_server_flavor=\<node\_server\_flavor\>; node\_image\_name=\<node\_image\_name\>; floating\_net\_id=\<floating\_net\_id\>; private\_net\_id=\<private\_net\_id\>; private\_subnet\_id=\<private\_subnet\_id\>"
+```
+heat stack-create simple-stack -f simple-scale.yaml -e environment.yaml --parameters \
+"key_name=<key_name>\
+;node_name=<node_name>\
+;node_server_flavor=<node_server_flavor>\
+;node_image_name=<node_image_name>;\
+;floating_net_id=<floating_net_id>;\
+;private_net_id=<private_net_id>;\
+;private_subnet_id=<private_subnet_id>"
+```
 
 Result:
 - run heat stack-list to ensure state is COMPLETE
 - Run heat stack-show simple-stack
 The default group's desired state is 2 VM instances, so a nova list should show 2 new instances created.
-Perform a curl -X GET http:\<floating-ip-of-vm\> for each of the VMs and verify it returns the internal network ip address of the VM.
+Perform a curl -X GET http:<floating-ip-of-vm> for each of the VMs and verify it returns the internal network ip address of the VM.
 
 Clean up the stack in preparation for the next lab
-- heat stack-delete simple-stack
 
+```
+heat stack-delete simple-stack
+```
 
 Lab 2:
 ------
@@ -68,19 +80,25 @@ Part 1:
 
 Usage:
 
-heat stack-create load-balancer.yaml --parameters "floating\_net\_id=\<floating\_net\_id\>; "private\_subnet\_id=\<private\_subnet\_id\>"
+```
+heat stack-create load-balancer.yaml --parameters \
+"floating_net_id=<floating_net_id>\
+; "private_subnet_id=<private_subnet_id>"
+```
 
 Result: Verify the relevant resources get created.
 
-- run heat stack-list to ensure state is COMPLETE
+```
+- heat stack-list to ensure state is COMPLETE
 - neutron lb-list
-- neutron lb-pool-show \<name of pool from above\>
+- neutron lb-pool-show <name of pool from above>
 - neutron lb-healthmonitor-list
 - neutron lb-vip-list
-- neutron lb-vip-show \<lb-vip-instance-id-from-above\>
-- neutron floatingip-list | grep \<address field from the output from lb-vip-show\>
+- neutron lb-vip-show <lb-vip-instance-id-from-above>
+- neutron floatingip-list | grep <address field from the output from lb-vip-show>
+```
 
-The floatingip should be pingable.  A curl -X GET http://\<floating-vip\\> should yeild a "503 Service Not Available" message
+The floatingip should be pingable.  A ```curl -X GET http://<floating-vip\>``` should yeild a "503 Service Not Available" message
 
 Part 2:
 
@@ -90,18 +108,30 @@ Part 2:
 
 The ha-servers.yaml hot template leverages the OS::Nova::Server::Scaled resource type declared in environment.yaml
 
+```
 resource_registry:
     "OS::Nova::Server::Scaled": "scaled-server.yaml"
+```
 
 Usage:
-heat stack-create ha-stack -f ha-servers.yaml -e environment.yaml --parameters 
-"key\_name=\<key\_name\>; node\_name=\<node\_name\>; node\_server_flavor=\<node\_server\_flavor\>; node\_image\_name=\<node\_image\_name\>; floating\_net\_id=\<floating\_net\_id\>; private\_net\_id=\<private\_net\_id\>; private\_subnet\_id=\<private\_subnet\_id\>; pool\_id=\<pool\_id\>"
+
+```
+heat stack-create simple-stack -f simple-scale.yaml -e environment.yaml --parameters \
+"key_name=<key_name>\
+;node_name=<node_name>\
+;node_server_flavor=<node_server_flavor>\
+;node_image_name=<node_image_name>;\
+;floating_net_id=<floating_net_id>;\
+;private_net_id=<private_net_id>;\
+;private_subnet_id=<private_subnet_id>;\
+;pool_id=<pool_id>"
+```
 
 Result:  
 
 - run heat stack-list to ensure state is COMPLETE
 - Verify that the VMs are active and pingable via their individual floating ips.
-- Perform a curl -X GET http://\<floating-vip\> and watch the IP addresses alternate between the 2 VMs
+- Perform a ```curl -X GET http://<floating-vip>``` and watch the IP addresses alternate between the 2 VMs
 
 
 Lab 3:
