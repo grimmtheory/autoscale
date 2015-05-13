@@ -5,10 +5,7 @@
 HOST_IP = "192.168.34.2"
 PUB_NET = "192.168.28"
 PRIV_NET = "10.1.0"
-# DNS1 = "8.8.8.8"
-# DNS2 = "8.8.4.4"
-DNS1 = "75.75.75.75"
-DNS2 = "75.75.76.76"
+DNS = "10.0.2.3"
 NETMASK = "255.255.255.0"
 
 IMAGE = "cirros-0.3.4-x86_64-uec"
@@ -265,8 +262,8 @@ done
 # use the google dns server as a sane default
 echo "Adding DNS servers to subnets..."
 sourceadmin
-neutron subnet-update public-subnet --dns_nameservers list=true #{DNS1}
-neutron subnet-update private-subnet --dns_nameservers list=true #{DNS1}
+neutron subnet-update public-subnet --dns_nameservers list=true #{DNS}
+neutron subnet-update private-subnet --dns_nameservers list=true #{DNS}
 neutron subnet-list
 neutron subnet-show private-subnet
 neutron subnet-show public-subnet
