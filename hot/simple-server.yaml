@@ -64,8 +64,8 @@ resources:
           template: |
             #!/bin/sh -v
             sudo apt-get -y install apache2
-            sudo bash -c 'export PUBLIC_IP=p_vm_ip'
-            sudo bash -c 'echo "OpenStack TM Vancouver Summit - Heat LBaaS Autoscaling Session\n" > /var/www/html/index.html'
-            sudo bash -c 'echo "At $PUBLIC_IP" >> /var/www/html/index.html'
+            sudo sh -c 'echo "Welcome to the OpenStack TM Vancouver Summit - Heat LBaaS Autoscaling Session\n" > /var/www/html/index.html'
+            sudo sh -c 'echo "$(ifconfig eth0 | grep "inet addr" | awk -F: "{ print $2 }" | awk "{ print $1 }") >> /var/www/html/indext.html'
+            #sudo sh -c 'export PUBLIC_IP=${p_vm_ip}; echo "<br> IP address - $PUBLIC_IP" >> /var/www/html/index.html'
           params:
             p_vm_ip: { get_attr: [ vm_floating_ip, floating_ip_address ] }

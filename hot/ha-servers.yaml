@@ -1,0 +1,45 @@
+heat_template_version: 2014-10-16  
+parameters:
+  key_name:
+    type: string
+    default: sc-key
+  node_name:
+    type: string
+    default: lb-vm
+  node_server_flavor:
+    type: string
+    default: Micro-Small
+  node_image_name:
+    type: string
+    default: Ubuntu-14.04
+  floating_net_id:
+    type: string
+    default: 8f3508a9-d4f5-4f9c-a5da-fd7f04059303
+  private_net_id:
+    type: string
+    default: 27764506-0338-45d3-8e8e-a5fbc050ec9c
+  private_subnet_id:
+    type: string
+    default: d53a30db-9e9d-4841-a115-ff22746a39f5
+  pool_id:
+    type: string
+    default: c7d13ae7-a160-4253-b0f2-09b8c15c3b6b
+
+resources:
+  web_scaler:
+    type: OS::Heat::AutoScalingGroup
+    properties:
+      cooldown: 60
+      desired_capacity: 2
+      max_size: 3
+      min_size: 1
+      resource:
+        type: OS::Nova::Server::Scaled
+        properties:
+          node_server_flavor: {get_param: node_server_flavor}
+          node_image_name: {get_param: node_image_name}
+          key_name: {get_param: key_name}
+          floating_net_id: {get_param: floating_net_id}
+          private_net_id: {get_param: private_net_id}
+          private_subnet_id: {get_param: private_subnet_id}
+          pool_id: {get_param: pool_id}

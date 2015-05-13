@@ -1,2 +1,3 @@
 resource_registry:  
-    "OS::Nova::Server::LBServer": "scaled-vm.yaml"
+    "OS::Nova::Server::Simple": "simple-server.yaml"
+    "OS::Nova::Server::Scaled": "scaled-server.yaml"
