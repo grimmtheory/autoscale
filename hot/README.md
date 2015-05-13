@@ -33,12 +33,12 @@ The resource type OS::Nova::Server::Simple is declared in the environment.yaml t
 resource_registry:
     "OS::Nova::Server::Simple": "simple-server.yaml"
 ```    
-The simple-server.yaml itself comprises of a hot template that takes in parameters required -
+The simple-server.yaml itself comprises of a hot template that takes in parameters as required -
 
 - Spawn a customized VM
 - Insert the ssh keypair
 - Create requisite security groups
-- Create a a VM port, assign an fixed ip from the internal network and apply the security group rules
+- Create a VM port, assign a fixed ip from the internal network and apply the security group rules
 - Create a floating ip on the external network and associcate it with the fixed ip
 - Setup user-data to create a script to simulate HTTP responses
 
