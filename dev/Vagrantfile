@@ -68,9 +68,14 @@ HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
+# Force meta data service to a specific nic and enable dhcp options
 EXTRA_OPTS=(metadata_host=$HOST_IP)
 Q_DHCP_EXTRA_DEFAULT_OPTS=(enable_metadata_network=True enable_isolated_metadata=True)
 
+# Force IPv4 only
+IP_VERSION=4
+
+# Select branch
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
 NEUTRON_BRANCH=#{DEVSTACK_BRANCH}
@@ -78,6 +83,9 @@ GLANCE_BRANCH=#{DEVSTACK_BRANCH}
 CINDER_BRANCH=#{DEVSTACK_BRANCH}
 HEAT_BRANCH=#{DEVSTACK_BRANCH}
 HORIZON_BRANCH=#{DEVSTACK_BRANCH}
+CEILOMETER_BRANCH=#{DEVSTACK_BRANCH}
+TROVE_BRANCH=#{DEVSTACK_BRANCH}
+SAHARA_BRANCH=#{DEVSTACK_BRANCH}
 
 # Default passwords
 ADMIN_PASSWORD=#{DEVSTACK_PASSWORD}
@@ -283,6 +291,7 @@ while [ $num -le 3 ]; do
 
 cat << HTTP > /home/vagrant/http$num.sh
 #!/bin/sh
+touch ~/cloud-init.test
 while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to #{PRIV_NET}.10$num' | sudo nc -l -p 80 ; done &
 HTTP
 
