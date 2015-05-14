@@ -43,27 +43,27 @@ Like the *STAGED* build, the *COMPLETE* build type is an amalgamation of the pri
 ## Build Tasks
 A mostly complete list of the more important build tasks provided by each build type is as follows:
 
-| Build Version  | Build Type                | Build Task                                                                                         |
-|----------------|:--------------------------|:---------------------------------------------------------------------------------------------------|
-| Stable and Dev | Base, Staged and Complete | Provision and configure virtual hardware                                                           |
-| Stable and Dev | Base, Staged and Complete | Download, install and configure operating system                                                   |
-| Dev            | Base, Staged and Complete | HW / HTTP acceleration - proxy, cache, VT-x, APIC-IO                                               |
-| Dev            | Base, Staged and Complete | OS Acceleration - sysctl tuning, TCP buffer, I/O scheduler                                         |
-| Dev            | Base, Staged and Complete | Public bridged adapter option, defaults to wifi nic                                                |
-| Stable and Dev | Staged and Complete       | Apt update and dependencies installed                                                              |
-| Stable and Dev | Staged and Complete       | Git clone DevStack, Autoscale, Heat-Templates, etc.                                                |
-| Stable and Dev | Staged and Complete       | Generate users and keys, add default key to Nova                                                   |
-| Stable and Dev | Staged and Complete       | Modify default security group - add ICMP, 22, 80 and 443                                           |
-| Stable and Dev | Staged and Complete       | Add DNS to default public- and private-subnet                                                      |
-| Stable and Dev | Staged and Complete       | Create a custom flavor, m1.micro - 1 vCPU x 32 MB RAM x 1 GB Disk                                  |
-| Stable and Dev | Complete                  | Spawn 3 VMs - cirros, m1.micro, static ip 10.0.0.101(2,3), keypair, static name node1(2),3)etc.    |
-| Stable and Dev | Complete                  | Create a load-balancer pool - pool1, connected to private-net, HTTP, round-robin                   |
-| Stable and Dev | Complete                  | Create 3 load-balancer pool members - node1(2,3), protocol port 80 and add them to pool1           |
-| Stable and Dev | Complete                  | Create a load-balancer health monitor - service HTTP, delay 3, retry 3, timeout 3                  |
-| Stable and Dev | Complete                  | Associate the new load-balancer health monitor to pool1                                            |
-| Stable and Dev | Complete                  | Create a load-balancer VIP - 10.0.0.100, port 80, protocol HTTP and attach to private network      |
-| Stable and Dev | Complete                  | Create a load-balancer floating-ip - 192.168.27.100 > 10.0.0.100                                   |
-| Stable and Dev | Complete                  | Create a "listener" on members - while...netcat...80 (no apache in cirros but works great for test)|
-| Stable and Dev | Complete                  | Test and verify - while...for vip in $publicnet.100 $privatenet.100; do curl http://$vip...done    |
+| Build Version    | Build Type                | Build Task                                                                                         |
+|------------------|:--------------------------|:---------------------------------------------------------------------------------------------------|
+| Stable and Dev   | Base, Staged and Complete | Provision and configure virtual hardware                                                           |
+| Stable and Dev   | Base, Staged and Complete | Download, install and configure operating system                                                   |
+| Dev              | Base, Staged and Complete | HW / HTTP acceleration - proxy, cache, VT-x, APIC-IO                                               |
+| Dev              | Base, Staged and Complete | OS Acceleration - sysctl tuning, TCP buffer, I/O scheduler                                         |
+| Dev              | Base, Staged and Complete | Public bridged adapter option, defaults to wifi nic                                                |
+| Stable and Dev   | Staged and Complete       | Apt update and dependencies installed                                                              |
+| Stable and Dev   | Staged and Complete       | Git clone DevStack, Autoscale, Heat-Templates, etc.                                                |
+| Stable and Dev   | Staged and Complete       | Generate users and keys, add default key to Nova                                                   |
+| Stable and Dev   | Staged and Complete       | Modify default security group - add ICMP, 22, 80 and 443                                           |
+| Stable and Dev   | Staged and Complete       | Add DNS to default public- and private-subnet                                                      |
+| Stable and Dev   | Staged and Complete       | Create a custom flavor, m1.micro - 1 vCPU x 32 MB RAM x 1 GB Disk                                  |
+| Stable and Dev   | Complete                  | Spawn 3 VMs - cirros, m1.micro, static ip / name 10.0.0.101(2,3) / name node1(2,3), key, etc.      |
+| Stable and Dev   | Complete                  | Create a load-balancer pool - pool1, connected to private-net, HTTP, round-robin                   |
+| Stable and Dev   | Complete                  | Create 3 load-balancer pool members - node1(2,3), protocol port 80 and add them to pool1           |
+| Stable and Dev   | Complete                  | Create a load-balancer health monitor - service HTTP, delay 3, retry 3, timeout 3                  |
+| Stable and Dev   | Complete                  | Associate the new load-balancer health monitor to pool1                                            |
+| Stable and Dev   | Complete                  | Create a load-balancer VIP - 10.0.0.100, port 80, protocol HTTP and attach to private network      |
+| Stable and Dev   | Complete                  | Create a load-balancer floating-ip - 192.168.27.100 > 10.0.0.100                                   |
+| Stable and Dev   | Complete                  | Create a "listener" on members - while...netcat...80 (no apache in cirros but works great for test)|
+| Stable and Dev   | Complete                  | Test and verify - while...for vip in $publicnet.100 $privatenet.100; do curl http://$vip...done    |
 
 Will be finished by jtg later...
