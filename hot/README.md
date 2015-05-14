@@ -15,19 +15,19 @@ Pre-reqs:
 Lab 1:
 ------
 The objective of this lab is to launch a server using a hot template.  
-The simple-server.yaml itself comprises of a hot template that takes in parameters as required -
+The simple-server.yaml itself comprises of a hot template that takes in parameters as required and -
 
 - Spawn a customized VM
-- Insert the ssh keypair
-- Create requisite security groups
-- Create a VM port, assign a fixed ip from the internal network and apply the security group rules
-- Create a floating ip on the external network and associcate it with the fixed ip
-- Setup user-data to create a script to simulate HTTP responses
+- Injects an ssh key
+- Creates requisite security groups
+- Creates a VM port, assigns a fixed ip from the internal network and apples the security group rules
+- Creates a floating ip on the external network and associcates it with the fixed ip
+- Runs a cloud-init user-data script to simulate an http server
 
 Usage:
 
 ```
-heat stack-create simple-stack -f simple-scale.yaml -e environment.yaml --parameters \
+heat stack-create simple-stack -f simple-server.yaml --parameters \
 "key_name=<key_name>\
 ;node_name=<node_name>\
 ;node_server_flavor=<node_server_flavor>\

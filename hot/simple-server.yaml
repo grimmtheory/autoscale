@@ -64,7 +64,7 @@ resources:
         export local_ip=$(ifconfig eth0|grep 'inet addr'|awk -F: '{print $2}'| awk '{print $1}')
         touch /home/cirros/http.sh
         cat << NETCAT > /home/cirros/http.sh
-        while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $local_ip" | sudo nc -l -p 80 ; done&
+        while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nYou are connected to $local_ip" | sudo nc -l -p 80 ; done&
         NETCAT
         chmod +rx /home/cirros/http.sh
         /home/cirros/http.sh
