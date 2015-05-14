@@ -27,14 +27,20 @@ parameters:
   initial_capacity:
     type: number
     default: 2
+  asg_group_min_size:
+    type: number
+    default: 1
+  asg_group_max_size:
+    type: number
+    default: 3
 
 resources:
   web_scaler:
     type: OS::Heat::AutoScalingGroup
     properties:
       desired_capacity: {get_param: initial_capacity}
-      max_size: 3
-      min_size: 1
+      max_size: {get_param: asg_group_max_size}
+      min_size: {get_param: asg_group_min_size}
       resource:
         type: OS::Nova::Server::Scaled
         properties:

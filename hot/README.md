@@ -14,25 +14,7 @@ Pre-reqs:
 
 Lab 1:
 ------
-The objective of this lab is to spin up # number of VMs as part of a ScalingGroup definition.
-
-```
-heat_template_version: 2014-10-16
-resources:
-  group:
-    type: OS::Heat::AutoScalingGroup
-    properties:
-	...
-    resource:
-        type: OS::Nova::Server::Simple
-```
-    
-The resource type OS::Nova::Server::Simple is declared in the environment.yaml template
-
-```
-resource_registry:
-    "OS::Nova::Server::Simple": "simple-server.yaml"
-```    
+The objective of this lab is to launch a server using a hot template.  
 The simple-server.yaml itself comprises of a hot template that takes in parameters as required -
 
 - Spawn a customized VM
@@ -134,6 +116,11 @@ Result:
 - Verify that the VMs are active and pingable via their individual floating ips.
 - Perform a ```curl -X GET http://<floating-vip>``` and watch the IP addresses alternate between the 2 VMs
 
+Clean up the stack in preparation for the next lab
+
+```
+heat stack-delete ha-stack
+```
 
 Lab 3:
 ------

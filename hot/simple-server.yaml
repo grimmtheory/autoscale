@@ -5,7 +5,7 @@ parameters:
     default: sc-key
   node_name:
     type: string
-    default: lb-vm
+    default: simple-server
   node_server_flavor:
     type: string
     default: Micro-Small
@@ -59,13 +59,12 @@ resources:
       networks:
         - port: { get_resource: vm_port }
       user_data_format: RAW
-      user_data:
-        str_replace:
-          template: |
-            #!/bin/sh -v
-            sudo apt-get -y install apache2
-            sudo sh -c 'echo "Welcome to the OpenStack TM Vancouver Summit - Heat LBaaS Autoscaling Session\n" > /var/www/html/index.html'
-            sudo sh -c 'echo "$(ifconfig eth0 | grep "inet addr" | awk -F: "{ print $2 }" | awk "{ print $1 }") >> /var/www/html/indext.html'
-            #sudo sh -c 'export PUBLIC_IP=${p_vm_ip}; echo "<br> IP address - $PUBLIC_IP" >> /var/www/html/index.html'
-          params:
-            p_vm_ip: { get_attr: [ vm_floating_ip, floating_ip_address ] }
+      user_data: |
+        #!/bin/bash -v
+        export local_ip=$(ifconfig eth0|grep 'inet addr'|awk -F: '{print $2}'| awk '{print $1}')
+        touch /home/cirros/http.sh
+        cat << NETCAT > /home/cirros/http.sh
+        while true; do echo -e "HTTP/1.0 200 OK\r\n\r\nWelcome to $local_ip" | sudo nc -l -p 80 ; done&
+        NETCAT
+        chmod +rx /home/cirros/http.sh
+        /home/cirros/http.sh

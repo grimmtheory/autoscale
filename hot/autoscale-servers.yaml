@@ -24,14 +24,27 @@ parameters:
   pool_id:
     type: string
     default: c7d13ae7-a160-4253-b0f2-09b8c15c3b6b
+  initial_capacity:
+    type: number
+    default: 1
+  cooldown_policy_seconds:
+    type: number
+    default: 30
+  asg_group_min_size:
+    type: number
+    default: 1
+  asg_group_max_size:
+    type: number
+    default: 3
 
 resources:
   web_scaler:
     type: OS::Heat::AutoScalingGroup
     properties:
-      cooldown: 60
-      max_size: 3
-      min_size: 1
+      desired_capacity: {get_param: initial_capacity}
+      cooldown: {get_param: cooldown_policy_seconds}
+      max_size: {get_param: asg_group_max_size}
+      min_size: {get_param: asg_group_min_size}
       resource:
         type: OS::Nova::Server::Scaled
         properties:
@@ -48,7 +61,7 @@ resources:
     properties:
       adjustment_type: change_in_capacity
       auto_scaling_group_id: { get_resource: web_scaler }
-      cooldown: 60
+      cooldown: {get_param: cooldown_policy_seconds}
       scaling_adjustment: 1
 
   scaledown_policy:
@@ -56,27 +69,29 @@ resources:
     properties:
       adjustment_type: change_in_capacity
       auto_scaling_group_id: { get_resource: web_scaler }
-      cooldown: 60
+      cooldown: {get_param: cooldown_policy_seconds}
       scaling_adjustment: -1
 
-  cpu_alarm_high:
+  lb_connection_rate_high:
     type: OS::Ceilometer::Alarm
     properties:
       meter_name: network.services.lb.total.connections.rate
-      statistic: count
+      statistic: avg
       period: 60
-      threshold: 10
+      evaluation_periods: 3
+      threshold: 2
       alarm_actions:
         - {get_attr: [scaleup_policy, alarm_url]}
       comparison_operator: gt
 
-  cpu_alarm_low:
+  lb_connection_rate_lo:
     type: OS::Ceilometer::Alarm
     properties:
       meter_name: network.services.lb.total.connections.rate
-      statistic: count
+      statistic: avg
       period: 60
-      threshold: 5
+      evaluation_periods: 3
+      threshold: 2
       alarm_actions:
         - {get_attr: [scaledown_policy, alarm_url]}
       comparison_operator: lt
