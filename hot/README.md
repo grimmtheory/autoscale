@@ -142,6 +142,48 @@ This lab will build on top of Lab 2 where in -
 
 - A member pool will be created with N number of VMs as specified in the ```initial_capacity```
 - Using the ab tool (ApacheBench) a load for an arbritrary number of concurrent requests will be generated against the ```floating-vip```
-- When the connection rate on the load balanced VMs crosses a pre-defined threshhold  for a given evaluation period, a VM will automatically be spawned and added to the load balanced pool.
+- When the connection rate on the load balanced VMs crosses a pre-defined threshhold for a given evaluation period, a VM will automatically be spawned and added to the load balanced pool based on a trigger from a pre-configured alarm for high connection rate in the hot template.
+- When the load generation stops, a low connection rate alarm will trigger causing one of the VMs in the pool to be removed.
 
-# schoksey - to continue here
+Pre-requisites:
+
+- A ```network.services.lb.total.connections.rate``` custom meter will need to be created as a pipeline in ceilometer that will track the rate of connections per second as a guage meter. ```ceilometer meter-list | grep connections.rate``` 
+- apache2-utils packaged needs to installed
+
+*Note:* For the purpose of this lab, the assumption is that the meter has been already added as part of your lab setup and apach2-utils package is available
+
+Usage:
+
+```
+heat stack-create ha-servers -f ha-servers.yaml -e environment.yaml --parameters \
+"key_name=<key_name>\
+;node_name=<node_name>\
+;node_server_flavor=<node_server_flavor>\
+;node_image_name=<node_image_name>;\
+;floating_net_id=<floating_net_id>;\
+;private_net_id=<private_net_id>;\
+;private_subnet_id=<private_subnet_id>;\
+;pool_id=<pool_id>\
+;initial_capacity=<initial-number-of-members>\
+;asg_group_min_size=<asg_group_min_size>\
+;asg_group_max_size=<asg_group_max_size>\"
+;cooldown_policy_seconds=<cooldown_policy_seconds>"
+```
+
+Verification:
+
+- Perform a ```curl -X GET http://<floating-vip>``` and watch the private IP addresses alternate between the VMs as the requests get load balanced in a round robin policy
+- Run the ab tool against the vip endpoint to generate load of 10 concurrent http requests continuosly and a limit of 300 seconds for a timeout on the response 
+
+```ab -c 10 -t 300 http://<floating-vip>```
+
+- Collect meter samples to check on the rate of connections per second
+```ceilometer sample-list -m network.services.lb.total.connections.rate ```
+
+- When the connection rate crosses 3 per second for a consecutive period equal to the number defined in the evaluation period by the Alarm resources in the hot template, a scaleup_policy will get executed and, 
+- A VM will start getting built and added to the pool ```nova list```
+
+- Stop the ab load generation and collect the sample on the ```ceilometer sample-list -m network.services.lb.total.connections.rate ``` once again.
+- Note the volume drop for N number of consecutive evaluaton periods after which a VM deletion should get triggered as a result of the ```scaledown_policy```
+
+
