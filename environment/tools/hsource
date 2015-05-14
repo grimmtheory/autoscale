@@ -17,7 +17,7 @@ export floatnet=`neutron net-list | grep -v ipv6 | grep public | awk '{ print $2
 export floatsubnet=`neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
 
 export privnet=`neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
-export privubet=`neutron sub-net-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
+export privsubnet=`neutron subnet-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
 
 export key=vagrant
 export image=cirros-0.3.4-x86_64-uec
