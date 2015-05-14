@@ -1,74 +1,47 @@
-heat_template_version: 2014-10-16
+heat_template_version: '2014-10-16'
 parameters:
-  key_name:
-    type: string
-    default: vagrant
-  node_name:
-    type: string
-    default: stacknode
-  node_server_flavor:
-    type: string
-    default: m1.micro
-  node_image_name:
-    type: string
-    default: cirros-0.3.4-x86_64-uec
-  floating_net_id:
-    type: string
-    default: 8cf83153-0734-4d98-92f1-7770aec3a163
-  private_net_id:
-    type: string
-    default: c7fe45a2-02ae-455e-89f5-9643530bf908
-  private_subnet_id:
-    type: string
-    default: fb185963-b20c-4a8d-a530-29bfb36143eb
+  floating_net_id: {default: 8cf83153-0734-4d98-92f1-7770aec3a163, type: string}
+  key_name: {default: vagrant, type: string}
+  node_image_name: {default: cirros-0.3.4-x86_64-uec, type: string}
+  node_name: {default: stacknode2, type: string}
+  node_server_flavor: {default: m1.micro, type: string}
+  private_net_id: {default: c7fe45a2-02ae-455e-89f5-9643530bf908, type: string}
+  private_subnet_id: {default: fb185963-b20c-4a8d-a530-29bfb36143eb, type: string}
 resources:
-
-  vm_sg:
-    type: OS::Neutron::SecurityGroup
+  vm_instance:
     properties:
-      name: vm_sg
-      description: Enable ICMP, SSH and HTTP
-      rules: [
-        {remote_ip_prefix: 0.0.0.0/0,
-        protocol: tcp,
-        port_range_min: 22,
-        port_range_max: 22},
-        {remote_ip_prefix: 0.0.0.0/0,
-        protocol: tcp,
-        port_range_min: 80,
-        port_range_max: 80},
-        {remote_ip_prefix: 0.0.0.0/0,
-        protocol: icmp}]
-
+      flavor: {get_param: node_server_flavor}
+      image: {get_param: node_image_name}
+      key_name: {get_param: key_name}
+      name: {get_param: node_name}
+      networks:
+      - port: {get_resource: vm_port}
+      user_data: |
+        #!/bin/sh
+        ip=`ifconfig eth0 | grep "inet addr" | awk '{ print $2 }' | awk -F: '{ print $2 }'`
+        cd /home/cirros/.ssh
+        dropbearkey -t rsa -f ~/.ssh/id_rsa
+        touch id_rsa; touch id_rsa.pub; touch authorized_keys
+        dropbearkey -y -f ~/.ssh/id_rsa | grep ssh >> authorized_keys
+        dropbearkey -y -f ~/.ssh/id_rsa | grep ssh > id_rsa.pub
+        ssh -y -i ~/.ssh/id_rsa cirros@localhost "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $HOSTNAME :: $ip' | sudo nc -l -p 80 ; done &"
+        exit 0
+      user_data_format: RAW
+    type: OS::Nova::Server
   vm_port:
-    type: OS::Neutron::Port
     properties:
+      fixed_ips:
+      - subnet_id: {get_param: private_subnet_id}
+      network_id: {get_param: private_net_id}
       security_groups:
       - {get_resource: vm_sg}
-      network_id: { get_param: private_net_id }
-      fixed_ips:
-        - subnet_id: { get_param: private_subnet_id }
-
-  vm_floating_ip:
-    type: OS::Neutron::FloatingIP
+    type: OS::Neutron::Port
+  vm_sg:
     properties:
-      floating_network_id: { get_param: floating_net_id }
-      port_id: { get_resource: vm_port }
-
-  vm_instance:
-    type: OS::Nova::Server
-    properties:
-      key_name: { get_param: key_name }
-      name: { get_param: node_name }
-      image: { get_param: node_image_name }
-      flavor: { get_param: node_server_flavor }
-      networks:
-        - port: { get_resource: vm_port }
-      user_data_format: RAW
-      user_data:
-        str_replace:
-          template: |
-            #!/bin/sh -v
-            echo $floating_ip_address > /home/cirros/cloud-init.check
-          params:
-            p_vm_ip: { get_attr: [ vm_floating_ip, floating_ip_address ] }
+      description: Enable ICMP, SSH and HTTP
+      name: vm_sg
+      rules:
+      - {port_range_max: 22, port_range_min: 22, protocol: tcp, remote_ip_prefix: 0.0.0.0/0}
+      - {port_range_max: 80, port_range_min: 80, protocol: tcp, remote_ip_prefix: 0.0.0.0/0}
+      - {protocol: icmp, remote_ip_prefix: 0.0.0.0/0}
+    type: OS::Neutron::SecurityGroup
