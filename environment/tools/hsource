@@ -4,13 +4,13 @@
 # and then use any of the exported values in your heat-stack creations
 # For example:
 # heat stack-create simple-stack -f simple-server.yaml --parameters \
-# "floating_net_id=$floatnet \
-# key_name=$key \
-# node_image_name=$image \
-# node_name=$nodename \
-# node_server_flavor=$flavor \
-# private_net_id=$privnet \
-# private_subnet_id=$privsubnet"
+# "floating_net_id=$floatnet\
+# ;key_name=$key\
+# ;node_image_name=$image\
+# ;node_name=$nodename\
+# ;node_server_flavor=$flavor\
+# ;private_net_id=$privnet\
+# ;private_subnet_id=$privsubnet"
 
 # Public network and subnet
 export floatnet=`neutron net-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
