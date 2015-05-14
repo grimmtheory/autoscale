@@ -43,11 +43,12 @@ Like the *STAGED* build, the *COMPLETE* build type is an amalgamation of the pri
 ## Build Tasks
 A mostly complete list of the more important build tasks provided by each build type is as follows:
 
-|      Build Version      |        Build Type         |               Build Task                |
-|-------------------------|:--------------------------|:----------------------------------------|
-| Stable and Dev          | Base, Staged and Complete | Provision and configurevirtual hardware |
-| Stable and Dev          | Staged and Complete       | Apt update and dependencies installed   |
-| Stable and Dev          | Staged and Complete       | Apt update and dependencies installed   |
+| Build Version           | Build Type                | Build Task                                          |
+|-------------------------|:--------------------------|:----------------------------------------------------|
+| Stable and Dev          | Base, Staged and Complete | Provision and configurevirtual hardware             |
+| Stable and Dev          | Staged and Complete       | Apt update and dependencies installed               |
+| Stable and Dev          | Staged and Complete       | Git clone DevStack, Autoscale, Heat-Templates, etc. |
+| 
 
 * Access and Security
 	* Apt update and dependencies install (namely git)
