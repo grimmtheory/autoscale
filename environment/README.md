@@ -21,23 +21,25 @@ In short vagrant drives the majority of the automation of the environment build 
 	* During this process it also handles a few housekeeping items around how VirtualBox behaves, e.g. vb.gui = true, VirtualBox machine name, etc.
 	* Note - I experimented with vagrant-proxyconf, vagrant-cachier and other tools to try and speed up build times and had some success but not enough to justify leaving the configuration in the stable build.  You can see some of these options and snips in the tools folder.  It's not that the plugins did not work as intended, it was more that proxying and / or caching ssl is a pain and all of the gpg key exchange and other security constraints associated with github, ubuntu apt package signing, etc.
 
-## Build Types
-Even though there is only 1 Vagrantfile in this folder it actually supports a total of 6 different build types.  This includes Base, Staged and Complete build types for both "stable" and "dev" versions of the tool.  If you look in the header of each of these Vagrantfiles you will see 2 variables where you can set the both the build type and the build version:
+## Build Versions and Build Types
+Even though there is only 1 Vagrantfile in this folder it actually supports a total of 6 different build types.  This includes Base, Staged and Complete build types for both "stable" and "dev" versions of the tool.  If you look in the header of Vagrantfile you will see 2 variables where you can set both the *Build "Type"* and the *Build "Verstion"*, shown here:
 
 	BUILD_TYPE="COMPLETE" # Set to BASE, STAGED or COMPLETE based on your build need
 	BUILD_VERSION="STABLE" # Set to STABLE or DEV based on your build purpose
 
-The intent of the *STABLE* and *DEV* build types and versions is as one might expect.  For the versions:
+### Build Versions
+The intent of the *STABLE* and *DEV* build versions is as one might expect.  For the versions:
 
 * STABLE would generally be used for working with **consistent and "stable"** functions and features (of Ubuntu, DevStack, Vagrant, VirtualBox, etc.)
 * DEV would generally be used for **developing or testing** new features and functionality.
 
+### Build Types
 For the *BASE*, *STAGED* and *COMPLETE* build types, the purpose of each is as follows:
-### BASE
+#### Base
 The purpose of the *BASE* build environment is to provide HW and OS installed and configured that is prepared for an OpenStack installation but does not actually have anything installed on it yet.  This includes the HW and OS setup along with networking (including staging OVS), cloned gitstack repos, local.conf configured, updates installed, etc.  The purpose being that if you wanted a quick build ready for install but want to make some changes to networking, local.conf, etc. before an install occurs then you could use this build would allow you to do that.  The second use case, and my own personal interest, is for training and demo, i.e. use the OpenStack-ready build and then walk through the other steps by hand.
-### STAGED
+#### Staged
 The *STAGED* build is the same as the *BASE* build with the exception that Devstack has been installed, however no OpenStack "post-install" tasks have been executed.
-### COMPLETE
+#### Complete
 Like the *STAGED* build, the *COMPLETE* build type is an amalgamation of the prior build types.  In addition to the tasks of the base and staging processes, the complete build process also adds several DevStack / OpenStack post-installation tasks.  This "post-install" set of commands and scripts is not Vagrant, VirtualBox or DevStack dependent and should work on any native / open OpenStack build that has the same services installed and of the same release.
 
 ## Build Tasks
@@ -66,4 +68,9 @@ A mostly complete list of the more important build tasks provided by each build 
 | Stable and Dev   | Complete                  | Create a "listener" on members - while...netcat...80 (no apache in cirros but works great for test)|
 | Stable and Dev   | Complete                  | Test and verify - while...for vip in $publicnet.100 $privatenet.100; do curl http://$vip...done    |
 
+## Build Flow
+
+## Build Testing and Troubleshooting
+
 Will be finished by jtg later...
+
