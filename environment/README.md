@@ -30,8 +30,10 @@ Even though there is only 1 Vagrantfile in this folder it actually supports a to
 ### Build Versions
 The intent of the *STABLE* and *DEV* build versions is as one might expect.  For the versions:
 
-* STABLE would generally be used for working with **consistent and "stable"** functions and features (of Ubuntu, DevStack, Vagrant, VirtualBox, etc.)
-* DEV would generally be used for **developing or testing** new features and functionality.
+#### Stable
+The *Stable* build type would generally be used for working with **consistent and "stable"** functions and features (of Ubuntu, DevStack, Vagrant, VirtualBox, etc.).  These "known good" configurations are helpful when you are testing new concepts, e.g. Trove, Sahara, etc.
+#### Dev (Development)
+The *Dev* build type would generally be used for **developing or testing** new features and functionality within an existing stack, e.g. adding automatic creation of Heat templates as part of the *Complete* build type.
 
 ### Build Types
 For the *BASE*, *STAGED* and *COMPLETE* build types, the purpose of each is as follows:
