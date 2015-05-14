@@ -1,0 +1,48 @@
+heat_template_version: 2013-05-23
+parameters:
+  key_name:
+    type: string
+    default: vagrant
+  node_name:
+    type: string
+    default: stacknode
+  node_server_flavor:
+    type: string
+    default: m1.tiny
+  node_image_name:
+    type: string
+    default: cirros-0.3.4-x86_64-uec
+  floating_net_id:
+    type: string
+    default: f91ae0db-71ea-4aca-bc2b-ba8a6297300e
+  private_net_id:
+    type: string
+    default: 2e9ff141-33a0-4924-81f8-7afd207607b0
+  private_subnet_id:
+    type: string
+    default: 3c21f862-0ac4-40d5-b2db-bf7fce072dc2
+
+resources:
+
+  vm_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_param: private_net_id }
+      fixed_ips:
+        - subnet_id: { get_param: private_subnet_id }
+
+  vm_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: floating_net_id }
+      port_id: { get_resource: vm_port }
+
+  vm_instance:
+    type: OS::Nova::Server
+    properties:
+      name: { get_param: node_name }
+      image: { get_param: node_image_name }
+      flavor: { get_param: node_server_flavor }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: vm_port }
