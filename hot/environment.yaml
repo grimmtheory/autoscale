@@ -1,3 +1,2 @@
 resource_registry:  
-    "OS::Nova::Server::Simple": "simple-server.yaml"
     "OS::Nova::Server::Scaled": "scaled-server.yaml"
