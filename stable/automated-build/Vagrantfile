@@ -210,9 +210,9 @@ ETH2
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
-      address #{VM_NET}.2
+      address "#{VM_NET}.2"
       netmask 255.255.255.0
-      up ip route add 10.0.0.0/24 via #{VM_NET}.3 dev br-ex
+      up ip route add 10.0.0.0/24 via "#{VM_NET}.3" dev br-ex
 BREX
 
     # Begin post tasks
@@ -261,8 +261,8 @@ done
 # use the google dns server as a sane default
 echo "Adding DNS servers to subnets..."
 sourceadmin
-neutron subnet-update public-subnet --dns_nameservers list=true #{DNS}
-neutron subnet-update private-subnet --dns_nameservers list=true #{DNS}
+neutron subnet-update public-subnet --dns_nameservers list=true "#{DNS}"
+neutron subnet-update private-subnet --dns_nameservers list=true "#{DNS}"
 neutron subnet-list
 neutron subnet-show private-subnet
 neutron subnet-show public-subnet
