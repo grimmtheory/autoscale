@@ -1,2 +1,2 @@
 resource_registry:  
-    "OS::Nova::Server::Scaled": "scaled-server.yaml"
+    "OS::Nova::Server::Scaled": "web-server.yaml"

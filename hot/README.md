@@ -94,17 +94,17 @@ Part 2:
 - Each of the VMs will be added as loadbalanced members of the pool created above. 
 - Note the additional parameter provided to this template will be the pool id from the resource created above.
 
-The ha-servers.yaml hot template leverages the ```OS::Nova::Server::Scaled``` resource type declared in environment.yaml
+The lb-members.yaml hot template leverages the ```OS::Nova::Server::Scaled``` resource type declared in environment.yaml as a resource pointing to nested template ```web-server.yaml```
 
 ```
 resource_registry:
-    "OS::Nova::Server::Scaled": "scaled-server.yaml"
+    "OS::Nova::Server::Scaled": "web-server.yaml"
 ```
 
 Usage:
 
 ```
-heat stack-create ha-servers -f ha-servers.yaml -e environment.yaml --parameters \
+heat stack-create lb-members-stack -f lb-members.yaml -e environment.yaml --parameters \
 "key_name=<key_name>\
 ;node_name=<node_name>\
 ;node_server_flavor=<node_server_flavor>\
@@ -129,7 +129,7 @@ Verification:
 
 Clean up the stack in preparation for the next lab.
 ```
-heat stack-delete ha-stack
+heat stack-delete lb-members-stack
 ```
 
 *NOTE: Do not delete the ```loadbalacer-stack```*
@@ -155,7 +155,8 @@ Pre-requisites:
 Usage:
 
 ```
-heat stack-create ha-servers -f ha-servers.yaml -e environment.yaml --parameters \
+heat stack-create lb-autoscale-stack -f lb-autoscale-members.yaml \
+-e environment.yaml --parameters \
 "key_name=<key_name>\
 ;node_name=<node_name>\
 ;node_server_flavor=<node_server_flavor>\
