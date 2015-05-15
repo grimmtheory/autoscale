@@ -129,7 +129,7 @@ Verification:
 
 Clean up the stack in preparation for the next lab.
 ```
-heat stack-delete ha-stack
+heat stack-delete lb-members-stack
 ```
 
 *NOTE: Do not delete the ```loadbalacer-stack```*
