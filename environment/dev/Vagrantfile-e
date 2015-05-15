@@ -14,31 +14,33 @@ VT_X = "false" # Intel / AMD VT acceleration, inconsistent performance when test
 APIC_IO = "false" # Network IO acceleration, inconsistent performance when testing with this build
 
 # Set OS config
+VAHOME = "/home/vagrant" # Vagrant home directory
 PROXY = "false" # Proxy server on or off
-PROXY_HOST = "http://192.168.33.1" # Proxy host if enabled
+PROXY_HOST = "http://192.168.34.1" # Proxy host if enabled
 PROXY_PORT = "8888/" # Proxy port if proxy host is enabled
 NIC3_PROMISCUOUS = "true" # Leave true for Neutron flat / bridged configurations
 VB_IMAGE_NAME = "ubuntu/trusty64" # The latest VirtualBox image of Trusty server 64 bit from Ubuntu
 VB_IMAGE_URL = "" # Populate if you are pulling your own image
-
-# Set OpenStack configs
-DEFAULT_NOVA_IMAGE = "cirros-0.3.4-x86_64-uec" # Used for all instance builds unless specified otherwise
-DEFAULT_NOVA_FLAVOR = "6" # Default is 1, m1.tiny, currently set to a custom flavor built during install, 6, m1.micro - same as tiny but with 32 MB vs. 512 MB of RAM vs. 512 for high node count tests
-LBPOOL_NAME = "lbpool1" # Name your load balancer pool
-PRIVATE_NETWORK_VIP = "#{PRIVATE_NETWORK}.100" # Defaults to .100 on the private network
-PUBLIC_NETWORK_VIP = "#{PUBLIC_NETWORK}.100" # Defaults to .100 on the private network
 
 # Set network config
 MANAGEMENT_NETWORK = "192.168.34" # Management network
 PUBLIC_NETWORK = "192.168.28" # Neutron gateway / provider network
 PRIVATE_NETWORK = "10.0.0" # Private network CIDR
 DEFAULT_MASK = "255.255.255.0" # Defualt /24 network mask unless specified otherwise
-HOST_IP = "#{MANAGEMENT_NETWORK}.2" # Management IP, ssh to the OS, OpenStack APIs, etc.
 OS_HOSTNAME = "DEVSTACK-#{BUILD_VERSION}-#{BUILD_TYPE}" # Hostname for the OS, defaults to devstack + build version + build type
-VB_HOSTNAME = "#{OS_HOSTNAME}.2" # Hostname label within VirtualBox, defaults to matching the OS_HOST_NAME
+VB_HOSTNAME = "#{OS_HOSTNAME}" # Hostname label within VirtualBox, defaults to matching the OS_HOSTNAME
 DNS = "10.0.2.3" # Default DNS server for your subnets, e.g. local VirtualBox forwarder
 
-# Set OpenStack config
+# Set OpenStack configs
+HOST_IP = "#{MANAGEMENT_NETWORK}.2" # Management IP, ssh to the OS, OpenStack APIs, etc.
+FLAT_NEUTRON_INTERFACE = "eth2" # Interface that Neutron bridges to, don't change this unless you understand the impact
+PUBLIC_NEUTRON_INTERFACE = "eth2" # Interface that Neutron routes and nats through, don't change this unless you understand the impact
+DEFAULT_NOVA_IMAGE = "cirros-0.3.4-x86_64-uec" # Used for all instance builds unless specified otherwise
+DEFAULT_NOVA_FLAVOR_NAME = "m1.micro" # Default is 1, m1.tiny, currently set to a custom flavor built during install, 6, m1.micro - same as tiny but with 32 MB vs. 512 MB of RAM vs. 512 for high node count tests
+DEFAULT_NOVA_FLAVOR_ID = "6" # Default is 1, m1.tiny, currently set to a custom flavor built during install, 6, m1.micro - same as tiny but with 32 MB vs. 512 MB of RAM vs. 512 for high node count tests
+LBPOOL_NAME = "lbpool1" # Name your load balancer pool
+PRIVATE_NETWORK_VIP = "#{PRIVATE_NETWORK}.100" # Defaults to .100 on the private network
+PUBLIC_NETWORK_VIP = "#{PUBLIC_NETWORK}.100" # Defaults to .100 on the private network
 DEVSTACK_BRANCH = "master" # Devstack branch to synch to, defaults to "master"
 DEVSTACK_PASSWORD = "stack" # Password for all devstack services and logins
 
@@ -52,15 +54,15 @@ Vagrant.configure("2") do |config|
   config.vm.box = "#{VB_IMAGE_NAME}"
   # config.vm.url = "#{VB_IMAGE_URL}"
 
-  if ENV['"#{PROXY}"'] = 'true'
+  if "#{PROXY}" == "true"
     if Vagrant.has_plugin?("vagrant-proxyconf")
       config.proxy.http     = "#{PROXY_HOST}:#{PROXY_PORT}"
-      config.proxy.https    = "#{PROXY_HOST}:#{PROXY_PORT}"
+      # config.proxy.https    = "#{PROXY_HOST}:#{PROXY_PORT}"
       config.proxy.no_proxy = "localhost,127.0.0.1,.example.com"
     end
   end
  
-  config.vm.hostname = "#{HOST_NAME}-#{BUILD_TYPE}"
+  config.vm.hostname = "#{OS_HOSTNAME}"
 
   # set the hostname, otherwise qrouter will be lost upon reload
   # config.vm.hostname = "devstack"
@@ -75,7 +77,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vb|
 
     # Lable the virtual machine
-    vb.name = "#{HOST_NAME}-#{BUILD_TYPE}"
+    vb.name = "#{VB_HOSTNAME}"
 
     # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
@@ -85,7 +87,7 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--memory", "#{RAM}"]
 
     # Enable promiscuous mode on eth2 for floating IPs to be accessible
-    if ENV['"#{NIC3_PROMISCUOUS}"'] = 'true'
+    if "#{NIC3_PROMISCUOUS}" == "true"
       vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
     end
 
@@ -107,6 +109,9 @@ Vagrant.configure("2") do |config|
     # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
 
+    # Clone the heat-templates repo
+    git clone https://github.com/openstack/heat-templates.git /home/vagrant/heat-templates
+
     # Clone the autoscale repo
     git clone https://github.com/grimmtheory/autoscale.git /home/vagrant/autoscale
 
@@ -118,9 +123,14 @@ HOST_IP=#{HOST_IP}
 DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
 DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
-EXTRA_OPTS=(metadata_host=$HOST_IP)
+# Extra config options
+EXTRA_OPTS=(metadata_host=#{HOST_IP})
 Q_DHCP_EXTRA_DEFAULT_OPTS=(enable_metadata_network=True enable_isolated_metadata=True)
 
+# Disable ipv6
+IP_VERSION=4
+
+# Set branch for services
 KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
 NOVA_BRANCH=#{DEVSTACK_BRANCH}
 PUBLIC_BRANCH=#{DEVSTACK_BRANCH}
@@ -202,8 +212,8 @@ enable_service q-lbaas
 enable_service neutron
 
 # Configure Neutron
-FLAT_INTERFACE=eth2
-PUBLIC_INTERFACE=eth2
+FLAT_INTERFACE=#{FLAT_NEUTRON_INTERFACE}
+PUBLIC_INTERFACE=#{PUBLIC_NEUTRON_INTERFACE}
 FIXED_RANGE=#{PRIVATE_NETWORK}.0/24
 FLOATING_RANGE=#{PUBLIC_NETWORK}.0/24
 PUBLIC_NETWORK_GATEWAY=#{PUBLIC_NETWORK}.2
@@ -232,6 +242,9 @@ CONF
 
     # fix permissions as the cloned repo is owned by root
     chown -R vagrant:vagrant /home/vagrant
+
+    # Add credentials to Vagrant's bash profile
+    echo "source /home/vagrant/devstack/openrc admin demo" >> /home/vagrant/.bash_profile
 
     # fix routing so that VMs can reach out to the internets
     cat << SYSCTL > /etc/sysctl.d/60-devstack.conf
@@ -263,7 +276,7 @@ auto br-ex
 iface br-ex inet static
       address "#{PUBLIC_NETWORK}.2"
       netmask "#{DEFAULT_MASK}"
-      up ip route add "#{PRIVATE_NETWORK}".0/24 via "#{PUBLIC_NETWORK}.3" dev br-ex
+      up ip route add "#{PRIVATE_NETWORK}.0/24" via "#{PUBLIC_NETWORK}.3" dev br-ex
 BREX
 
     # Begin post tasks
@@ -289,6 +302,22 @@ sourceadmin () { echo "Sourcing user admin and project admin..."; source /home/v
 sourcedemo () { echo "Sourcing user admin and project demo..."; source /home/vagrant/devstack/openrc admin demo; }
 
 sourceadmin
+
+# Create some variables
+
+# Public network and subnet
+floatnet=`neutron net-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
+floatsubnet=`neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'`
+
+# Private network and subnet
+privnet=`neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
+privsubnet=`neutron subnet-list | grep -v ipv6 | grep private | awk '{ print $2 }'`
+
+# Other stuff
+key=vagrant
+image=cirros-0.3.4-x86_64-uec
+flavor=m1.micro
+nodename=stacknode
 
 # generate a keypair and make it available via share
 echo "Generating keypair..."
@@ -324,14 +353,14 @@ echo "Setting up web instances..."
 sourcedemo
 
 # Create custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
-nova flavor-create --is-public true m1.micro 6 64 1 1
+nova flavor-create --is-public true "#{DEFAULT_NOVA_FLAVOR_NAME}" 6 64 1 1
 
 # Spawn instances
 num=1
 
 while [ $num -le 3 ]; do
 
-nova boot --image $(nova image-list | awk '/ cirros-0.3.4-x86_64-uec / {print $2}') --flavor 6 --nic net-id=$(neutron net-list | awk '/ private / {print $2}'),v4-fixed-ip="#{PRIVATE_NETWORK}.10$num --key-name vagrant node$num
+nova boot --image "#{DEFAULT_NOVA_IMAGE}" --flavor "#{DEFAULT_NOVA_FLAVOR_ID}" --nic net-id=$privnet,v4-fixed-ip=#{PRIVATE_NETWORK}.10$num --key-name vagrant node$num
 sleep 30
 nova show node$num
 num=$(( $num + 1 ))
@@ -344,7 +373,7 @@ nova list
 echo "Creating load balancer pool..."
 sourcedemo
 subnetid=`neutron subnet-list | grep " private" | awk '{ print $2 }'`
-neutron lb-pool-create --lb-method ROUND_ROBIN --name pool1 --protocol HTTP --subnet-id $subnetid
+neutron lb-pool-create --lb-method ROUND_ROBIN --name "#{LBPOOL_NAME}" --protocol HTTP --subnet-id $subnetid
 sleep 10
 neutron lb-pool-list
 
@@ -353,7 +382,7 @@ echo "Adding load balancer pool members"
 sourcedemo
 num=1
 while [ $num -le 3 ]; do
-  neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num --protocol-port 80 pool1
+  neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num" --protocol-port 80 "#{LBPOOL_NAME}"
   sleep 5
   num=$(( $num + 1 ))
 done
@@ -365,7 +394,7 @@ echo "Creating load balancer health monitor..."
 sourcedemo
 neutron lb-healthmonitor-create --delay 3 --type HTTP --max-retries 3 --timeout 3
 healthmonitorid=`neutron lb-healthmonitor-list | grep HTTP | awk '{ print $2 }'`
-neutron lb-healthmonitor-associate $healthmonitorid pool1
+neutron lb-healthmonitor-associate $healthmonitorid" "#{LBPOOL_NAME}"
 sleep 5
 neutron lb-healthmonitor-list
 
@@ -373,7 +402,7 @@ neutron lb-healthmonitor-list
 echo "Creating load balancer vip..."
 sourcedemo
 subnetid=`neutron subnet-list | grep " private" | awk '{ print $2 }'`
-neutron lb-vip-create --name vip-"#{PRIVATE_NETWORK}.100" --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address "#{PRIVATE_NETWORK}.100" pool1
+neutron lb-vip-create --name vip-"#{PRIVATE_NETWORK}.100" --protocol-port 80 --protocol HTTP --subnet-id $subnetid --address "#{PRIVATE_NETWORK}.100" "#{LBPOOL_NAME}"
 sleep 5
 neutron lb-vip-list
 
@@ -381,19 +410,19 @@ neutron lb-vip-list
 echo "Adding floating ip to load balancer..."
 sourcedemo
 portid=`neutron port-list | grep "#{PRIVATE_NETWORK}.100" | awk '{ print $2 }'`
-neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK}.100" --floating-ip-address "#{PUBLIC_NETWORK.100" public
+neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK}.100" --floating-ip-address "#{PUBLIC_NETWORK}.100" public
 sleep 5
 neutron floatingip-list
 
 # Turn on an http listener for each host
-for ip in #{PRIVATE_NETWORK}.101 #{PRIVATE_NETWORK}.102 #{PRIVATE_NETWORK}.103; do
+for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103"; do
   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
   sleep 5
 done
 
 # Testing VIPs
 echo ""
-for vip in #{PRIVATE_NETWORK_VIP} #{PUBLIC_NETWORK_VIP}; do
+for vip in "#{PRIVATE_NETWORK_VIP}" "#{PUBLIC_NETWORK_VIP}"; do
   echo ""; echo "Testing $vip..."
   num=1
   while [[ num++ -lt 6 ]]; do
