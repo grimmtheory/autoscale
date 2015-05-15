@@ -147,8 +147,8 @@ SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
 SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
 
 SCREEN_LOGDIR=/opt/stack/logs
-LOGFILE="#{VAHOME}"/devstack/logs/stack.sh.log
-INSTANCES_PATH="#{VAHOME}"/instances
+LOGFILE=#{VAHOME}/devstack/logs/stack.sh.log
+INSTANCES_PATH=#{VAHOME}/instances
 
 # Disable unwanted services
 # Disable nova network
@@ -321,7 +321,7 @@ nodename=stacknode
 
 # generate a keypair and make it available via share
 echo "Generating keypair..."
-key="#{VAHOME}"/.ssh/id_rsa
+key=#{VAHOME}/.ssh/id_rsa
 ssh-keygen -t rsa -N "" -f $key
 chown -R vagrant:vagrant "#{VAHOME}"; chmod 600 $key; chmod 644 $key.pub
 
@@ -331,7 +331,7 @@ cd "#{VAHOME}"/devstack
 for user in admin demo; do
   source openrc $user $user
   nova keypair-add --pub-key $key.pub vagrant
-  nova secgroup-add-rule default udp 1 65535 0.0.0.0
+  nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
   nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
   nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
   nova secgroup-add-rule default tcp 80 80 0.0.0.0/0
@@ -416,6 +416,7 @@ neutron floatingip-list
 
 # Turn on an http listener for each host
 for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103"; do
+  echo connecting to "#{PRIVATE_NETWORK}.$ip" aka $ip
   ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
   sleep 5
 done
