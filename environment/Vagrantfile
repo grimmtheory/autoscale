@@ -63,6 +63,9 @@ Vagrant.configure("2") do |config|
     # Clone the devstack repo
     git clone https://github.com/openstack-dev/devstack.git /home/vagrant/devstack
 
+    # Clone the heat-templates repo
+    git clone https://github.com/openstack/heat-templates.git /home/vagrant/heat-templates
+
     # Clone the autoscale repo
     git clone https://github.com/grimmtheory/autoscale.git /home/vagrant/autoscale
 
@@ -185,6 +188,9 @@ CONF
     # Set passwords
     echo root:stack | chpasswd
     echo vagrant:stack | chpasswd
+
+    # Add source creds to vagrant .bash_profile
+    echo "source /home/vagrant/devstack/openrc admin demo" >> /home/vagrant/.bash_profile
 
     # fix permissions as the cloned repo is owned by root
     chown -R vagrant:vagrant /home/vagrant
@@ -343,8 +349,8 @@ neutron floatingip-list
 
 # Turn on an http listener for each host
 for ip in 10.0.0.101 10.0.0.102 10.0.0.103; do
-  ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
-  sleep 5
+  ssh -i $key -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\n### SUCCESS ### You are connected to $ip' | sudo nc -l -p 80 ; done &"
+  sleep 30
 done
 
 # Testing VIPs
