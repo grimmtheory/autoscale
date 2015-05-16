@@ -1,25 +1,25 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# Some global settings for devstack local.conf
+### SET GLOBAL VARIABLES ###
 
 # Set network info
 HOST_IP = "192.168.33.2"
 DNS = "10.0.2.3"
-VM_NET = "192.168.27"
-VM_NAME = "devstack2"
+PUBLIC_NETWORK = "192.168.27"
+VM_NAME = "devstack"
 
 # Set DevStack info
 DEVSTACK_BRANCH = "master"
 DEVSTACK_PASSWORD = "stack"
+
+#### BEGIN VAGRANT HW CONFIG ###
 
 Vagrant.configure("2") do |config|
 
   # Select distribution and build for the box
   config.vm.box = "ubuntu/trusty64"
 
-  config.vm.hostname = "devstack-staged"
-  
   # set the hostname, otherwise qrouter will be lost upon reload
   config.vm.hostname = "#{VM_NAME}"
 
@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
   config.vm.network :private_network, ip: "#{HOST_IP}"
 
   # eth2, this will be the "public" VM network
-  config.vm.network :private_network, ip: "#{VM_NET}.2", netmask: "255.255.255.0", auto_config: false
+  config.vm.network :private_network, ip: "#{PUBLIC_NETWORK}.2", netmask: "255.255.255.0", auto_config: false
 
   # virtual-box specific settings
   config.vm.provider :virtualbox do |vb|
@@ -161,9 +161,9 @@ enable_service neutron
 FLAT_INTERFACE=eth2
 PUBLIC_INTERFACE=eth2
 FIXED_RANGE=10.0.0.0/24
-FLOATING_RANGE=#{VM_NET}.0/24
-PUBLIC_NETWORK_GATEWAY=#{VM_NET}.2
-Q_FLOATING_ALLOCATION_POOL=start=#{VM_NET}.3,end=#{VM_NET}.254
+FLOATING_RANGE=#{PUBLIC_NETWORK}.0/24
+PUBLIC_NETWORK_GATEWAY=#{PUBLIC_NETWORK}.2
+Q_FLOATING_ALLOCATION_POOL=start=#{PUBLIC_NETWORK}.3,end=#{PUBLIC_NETWORK}.254
 
 # Enable Ceilometer - Metering Service (metering + alarming)
 enable_service ceilometer-collector
@@ -217,9 +217,9 @@ ETH2
     cat << BREX > /etc/network/interfaces.d/br-ex.cfg
 auto br-ex
 iface br-ex inet static
-      address "#{VM_NET}.2"
+      address "#{PUBLIC_NETWORK}.2"
       netmask 255.255.255.0
-      up ip route add 10.0.0.0/24 via "#{VM_NET}.3" dev br-ex
+      up ip route add 10.0.0.0/24 via "#{PUBLIC_NETWORK}.3" dev br-ex
 BREX
 
     # Begin post tasks
@@ -258,7 +258,7 @@ cd /home/vagrant/devstack
 for user in admin demo; do
   source openrc $user $user
   nova keypair-add --pub-key $key.pub vagrant
-  nova secgroup-add-rule default udp 1 65535 0.0.0.0
+  nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
   nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
   nova secgroup-add-rule default tcp 22 22 0.0.0.0/0
   nova secgroup-add-rule default tcp 80 80 0.0.0.0/0

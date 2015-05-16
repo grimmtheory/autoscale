@@ -124,14 +124,16 @@ Vagrant.configure("2") do |config|
   end
 
   if "#{BUILD_TYPE}" != "STABLE"
-  # Suppress tty messages
-  config.vm.provision "fix-no-tty", type: "shell" do |s|
-    s.privileged = false
-    s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
-  end
+    # Suppress tty messages
+    config.vm.provision "fix-no-tty", type: "shell" do |s|
+      s.privileged = false
+      s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+    end
 
-  # Begin in-line script
-  config.vm.provision "shell", inline: <<-EOF
+    # Begin in-line script
+    config.vm.provision "shell", inline: <<-EOF
+
+    EOF
 
     # Install git
     apt-get update
@@ -149,123 +151,125 @@ Vagrant.configure("2") do |config|
     # Configure devstack
     cd "#{VAHOME}/devstack"
     cat << CONF > "#{VAHOME}/devstack/local.conf"
-[[local|localrc]]
-HOST_IP=#{HOST_IP}
-DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
-DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
+    CONF
 
-# Extra config options
-# EXTRA_OPTS=(metadata_host=#{HOST_IP})
-# Q_DHCP_EXTRA_DEFAULT_OPTS=(enable_metadata_network=True enable_isolated_metadata=True)
+    [[local|localrc]]
+    HOST_IP=#{HOST_IP}
+      DEVSTACK_BRANCH=#{DEVSTACK_BRANCH}
+      DEVSTACK_PASSWORD=#{DEVSTACK_PASSWORD}
 
-# Disable ipv6
-# IP_VERSION=4
+      # Extra config options
+      # EXTRA_OPTS=(metadata_host=#{HOST_IP})
+      # Q_DHCP_EXTRA_DEFAULT_OPTS=(enable_metadata_network=True enable_isolated_metadata=True)
 
-# Set branch for services
-KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
-NOVA_BRANCH=#{DEVSTACK_BRANCH}
-PUBLIC_BRANCH=#{DEVSTACK_BRANCH}
-GLANCE_BRANCH=#{DEVSTACK_BRANCH}
-CINDER_BRANCH=#{DEVSTACK_BRANCH}
-HEAT_BRANCH=#{DEVSTACK_BRANCH}
-HORIZON_BRANCH=#{DEVSTACK_BRANCH}
+      # Disable ipv6
+      # IP_VERSION=4
 
-# Default passwords
-ADMIN_PASSWORD=#{DEVSTACK_PASSWORD}
-MYSQL_PASSWORD=#{DEVSTACK_PASSWORD}
-RABBIT_PASSWORD=#{DEVSTACK_PASSWORD}
-SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
-SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
+      # Set branch for services
+      KEYSTONE_BRANCH=#{DEVSTACK_BRANCH}
+      NOVA_BRANCH=#{DEVSTACK_BRANCH}
+      PUBLIC_BRANCH=#{DEVSTACK_BRANCH}
+      GLANCE_BRANCH=#{DEVSTACK_BRANCH}
+      CINDER_BRANCH=#{DEVSTACK_BRANCH}
+      HEAT_BRANCH=#{DEVSTACK_BRANCH}
+      HORIZON_BRANCH=#{DEVSTACK_BRANCH}
 
-SCREEN_LOGDIR=/opt/stack/logs
-LOGFILE=#{VAHOME}/devstack/logs/stack.sh.log
-INSTANCES_PATH=#{VAHOME}/instances
+      # Default passwords
+      ADMIN_PASSWORD=#{DEVSTACK_PASSWORD}
+      MYSQL_PASSWORD=#{DEVSTACK_PASSWORD}
+      RABBIT_PASSWORD=#{DEVSTACK_PASSWORD}
+      SERVICE_PASSWORD=#{DEVSTACK_PASSWORD}
+      SERVICE_TOKEN=#{DEVSTACK_PASSWORD}
 
-# Disable unwanted services
-# Disable nova network
-disable_service n-net
-# Disable tempest
-disable_service tempest
-# Disable sahara
-disable_service sahara
-# Disable trove
-disable_service trove
-disable_service tr-api
-disable_service tr-mgr
-disable_service tr-cond
-# Disable swift
-disable_service s-proxy
-disable_service s-object
-disable_service s-container
-disable_service s-account
-# Disable cinder
-disable_service cinder
-disable_service c-api
-disable_service c-vol
-disable_service c-sch
-disable_service c-bak
+      SCREEN_LOGDIR="/opt/stack/logs"
+    LOGFILE="#{VAHOME}/devstack/logs/stack.sh.log"
+    INSTANCES_PATH="#{VAHOME}/instances"
 
-# Enable Cinder services
-# enable_service cinder
-# enable_service c-api
-# enable_service c-vol
-# enable_service c-sch
-# enable_service c-bak
+    # Disable unwanted services
+    # Disable nova network
+    disable_service n-net
+    # Disable tempest
+    disable_service tempest
+    # Disable sahara
+    disable_service sahara
+    # Disable trove
+    disable_service trove
+    disable_service tr-api
+    disable_service tr-mgr
+    disable_service tr-cond
+    # Disable swift
+    disable_service s-proxy
+    disable_service s-object
+    disable_service s-container
+    disable_service s-account
+    # Disable cinder
+    disable_service cinder
+    disable_service c-api
+    disable_service c-vol
+    disable_service c-sch
+    disable_service c-bak
 
-# Configure Cinder services
-# VOLUME_GROUP="stack-volumes"
-# VOLUME_NAME_PREFIX="volume-"
-# VOLUME_BACKING_FILE_SIZE=250M
+    # Enable Cinder services
+    # enable_service cinder
+    # enable_service c-api
+    # enable_service c-vol
+    # enable_service c-sch
+    # enable_service c-bak
 
-# Enable Database Backend MySQL
-enable_service mysql
+    # Configure Cinder services
+    # VOLUME_GROUP="stack-volumes"
+    # VOLUME_NAME_PREFIX="volume-"
+    # VOLUME_BACKING_FILE_SIZE=250M
 
-# Enable RPC Backend RabbitMQ
-enable_service rabbit
+    # Enable Database Backend MySQL
+    enable_service mysql
 
-# Enable Keystone - OpenStack Identity Service
-enable_service key
+    # Enable RPC Backend RabbitMQ
+    enable_service rabbit
 
-# Enable Horizon - OpenStack Dashboard Service
-enable_service horizon
+    # Enable Keystone - OpenStack Identity Service
+    enable_service key
 
-# Enable Glance - OpenStack Image Registry service 
-enable_service g-api
-enable_service g-reg
+    # Enable Horizon - OpenStack Dashboard Service
+    enable_service horizon
 
-# Enable Neutron
-enable_service q-svc
-enable_service q-agt
-enable_service q-dhcp
-enable_service q-l3
-enable_service q-meta
-enable_service q-lbaas
-enable_service neutron
+    # Enable Glance - OpenStack Image Registry service
+    enable_service g-api
+    enable_service g-reg
 
-# Configure Neutron
-FLAT_INTERFACE=#{FLAT_NEUTRON_INTERFACE}
-PUBLIC_INTERFACE=#{PUBLIC_NEUTRON_INTERFACE}
-FIXED_RANGE=#{PRIVATE_NETWORK}.0/24
-FLOATING_RANGE=#{PUBLIC_NETWORK}.0/24
-PUBLIC_NETWORK_GATEWAY=#{PUBLIC_NETWORK}.2
-Q_FLOATING_ALLOCATION_POOL=start=#{PUBLIC_NETWORK}.3,end=#{PUBLIC_NETWORK}.254
+    # Enable Neutron
+    enable_service q-svc
+    enable_service q-agt
+    enable_service q-dhcp
+    enable_service q-l3
+    enable_service q-meta
+    enable_service q-lbaas
+    enable_service neutron
 
-# Enable Ceilometer - Metering Service (metering + alarming)
-enable_service ceilometer-collector
-enable_service ceilometer-acompute
-enable_service ceilometer-acentral
-enable_service ceilometer-anotification
-enable_service ceilometer-api
-enable_service ceilometer-alarm-notifier
-enable_service ceilometer-alarm-evaluator
+    # Configure Neutron
+    FLAT_INTERFACE="#{FLAT_NEUTRON_INTERFACE}"
+    PUBLIC_INTERFACE="#{PUBLIC_NEUTRON_INTERFACE}"
+    FIXED_RANGE="#{PRIVATE_NETWORK}.0/24"
+    FLOATING_RANGE="#{PUBLIC_NETWORK}.0/24"
+    PUBLIC_NETWORK_GATEWAY="#{PUBLIC_NETWORK}.2"
+    Q_FLOATING_ALLOCATION_POOL="start='#{PUBLIC_NETWORK}.3,end=#{PUBLIC_NETWORK}.254'"
 
-# Enable Heat - Orchestration Service
-enable_service heat
-enable_service h-api
-enable_service h-api-cfn
-enable_service h-api-cw
-enable_service h-eng
-CONF
+    # Enable Ceilometer - Metering Service (metering + alarming)
+    enable_service ceilometer-collector
+    enable_service ceilometer-acompute
+    enable_service ceilometer-acentral
+    enable_service ceilometer-anotification
+    enable_service ceilometer-api
+    enable_service ceilometer-alarm-notifier
+    enable_service ceilometer-alarm-evaluator
+
+    # Enable Heat - Orchestration Service
+    enable_service heat
+    enable_service h-api
+    enable_service h-api-cfn
+    enable_service h-api-cw
+    enable_service h-eng
+    CONF
 
     # Set passwords
     echo "" ; echo "Setting passwords..."
@@ -277,16 +281,16 @@ CONF
     chown -R vagrant:vagrant "#{VAHOME}"
 
     # Add credentials to Vagrant's bash profile
-    echo "" ; echo "Adding openrc credentials to "#{VAHOME}/.bash_profile""
-    echo "source "#{VAHOME}/devstack/openrc admin demo" >> "#{VAHOME}/.bash_profile"
+    echo "" ; echo "Adding openrc credentials to '#{VAHOME}/.bash_profile'"
+    echo "source '#{VAHOME}/devstack/openrc admin demo' >> '#{VAHOME}/.bash_profile'"
 
     # fix routing so that VMs can reach out to the internets
     echo "" ; echo "Fixing routing so that "#{PRIVATE_NETWORK}.0/24" can see "#{PUBLIC_NETWORK}.0/24"
-    cat << SYSCTL > /etc/sysctl.d/60-devstack.conf
-net.ipv4.conf.eth0.proxy_arp = 1
-net.ipv4.ip_forward = 1
-SYSCTL
-    
+    cat << SYSCTL > "/etc/sysctl.d/60-devstack.conf"
+    net.ipv4.conf.eth0.proxy_arp = 1
+    net.ipv4.ip_forward = 1
+    SYSCTL
+
     echo "" ; echo "Applying new routing, interface rules, etc."
     sysctl --system
     iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
@@ -302,239 +306,239 @@ SYSCTL
     cd "#{VAHOME}/devstack"
     sudo -u vagrant env HOME=#{VAHOME} ./stack.sh
 
-    # fix network setup to make VMs pingable from inside and outside devstack
-    echo "" ; echo "Fix network setup to make VMs pingable from inside and outside devstack"
+      # fix network setup to make VMs pingable from inside and outside devstack
+      echo "" ; echo "Fix network setup to make VMs pingable from inside and outside devstack"
     ovs-vsctl add-port br-ex eth2
 
     # Setup the eth2 interfaces file
-    cat << ETH2 > /etc/network/interfaces.d/eth2.cfg
-auto eth2
-iface eth2 inet manual
-ETH2
+    cat << ETH2 > "/etc/network/interfaces.d/eth2.cfg"
+    auto eth2
+    iface eth2 inet manual
+    ETH2
 
     # Setup the br-ex interfaces file
-    cat << BREX > /etc/network/interfaces.d/br-ex.cfg
-auto br-ex
-iface br-ex inet static
-      address "#{PUBLIC_NETWORK}.2"
-      netmask "#{DEFAULT_MASK}"
-      up ip route add "#{PRIVATE_NETWORK}.0/24" via "#{PUBLIC_NETWORK}.3" dev br-ex
-BREX
+    cat << BREX > "/etc/network/interfaces.d/br-ex.cfg"
+    auto br-ex
+    iface br-ex inet static
+    address "#{PUBLIC_NETWORK}.2"
+    netmask "#{DEFAULT_MASK}"
+    up ip route add "#{PRIVATE_NETWORK}.0/24" via "#{PUBLIC_NETWORK}.3" dev br-ex
+    BREX
 
     # Begin post tasks
     cd "#{VAHOME}"
 
-# Report stack.sh run time - Stack.sh used to report run time, since they've removed that add it back
-devstart=`head -n 1 "#{VAHOME}/devstack/logs/stack.sh.log" | awk '{ print $2 }' | cut -d . -f 1`
-devstop=`tail -n 9 "#{VAHOME}/devstack/logs/stack.sh.log" | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
-startdate=$(date -u -d "$devstart" +"%s")
-enddate=$(date -u -d "$devstop" +"%s")
-runtime=`date -u -d "0 $enddate sec - $startdate sec" +"%H:%M:%S"`
+    # Report stack.sh run time - Stack.sh used to report run time, since they've removed that add it back
+    devstart=`head -n 1 "#{VAHOME}/devstack/logs/stack.sh.log" | awk '{ print $2 }' | cut -d . -f 1`
+    devstop=`tail -n 9 "#{VAHOME}/devstack/logs/stack.sh.log" | grep -m1 2015 | awk '{ print $2 }' | cut -d . -f 1`
+    startdate=$(date -u -d "$devstart" +"%s")
+    enddate=$(date -u -d "$devstop" +"%s")
+    runtime=`date -u -d "0 $enddate sec - $startdate sec" +"%H:%M:%S"`
 
-echo " -----------------------------"
-echo " | DEVSTACK START:  $devstart |"
-echo " | DEVSTACK STOP:   $devstop |"
-echo " -----------------------------"
-echo " | TOTAL RUN TIME:  $runtime |"
-echo " -----------------------------"
-echo ""
+    echo " -----------------------------"
+    echo " | DEVSTACK START:  $devstart |"
+    echo " | DEVSTACK STOP:   $devstop |"
+    echo " -----------------------------"
+    echo " | TOTAL RUN TIME:  $runtime |"
+    echo " -----------------------------"
+    echo ""
 
-# Source credential functions to allow easy swapping between creds as needed
-sourceadmin () { echo "Sourcing user admin and project admin..."; source "#{VAHOME}/devstack/openrc" admin admin; }
-sourcedemo () { echo "Sourcing user admin and project demo..."; source "#{VAHOME}/devstack/openrc" admin demo; }
+    # Source credential functions to allow easy swapping between creds as needed
+    sourceadmin () { echo "Sourcing user admin and project admin..."; source "#{VAHOME}/devstack/openrc" admin admin; }
+    sourcedemo () { echo "Sourcing user admin and project demo..."; source "#{VAHOME}/devstack/openrc" admin demo; }
 
-sourceadmin
+    sourceadmin
 
-# Setup local variables
-PUBLIC_NETWORK_ID = `neutron net-list | grep -v ipv6 | grep public | awk '{ print $2 }'` # Public network guid
-PUBLIC_SUBNET_ID = `neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'` # Public subnet guid
-PRIVATE_NETWORK_ID = `neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'` # Private network guid
-PRIVATE_SUBNET_ID = `neutron subnet-list | grep -v ipv6 | grep private | awk '{ print $2 }'` # Private subnet guid
+    # Setup local variables
+    PUBLIC_NETWORK_ID = `neutron net-list | grep -v ipv6 | grep public | awk '{ print $2 }'` # Public network guid
+    PUBLIC_SUBNET_ID = `neutron subnet-list | grep -v ipv6 | grep public | awk '{ print $2 }'` # Public subnet guid
+    PRIVATE_NETWORK_ID = `neutron net-list | grep -v ipv6 | grep private | awk '{ print $2 }'` # Private network guid
+    PRIVATE_SUBNET_ID = `neutron subnet-list | grep -v ipv6 | grep private | awk '{ print $2 }'` # Private subnet guid
 
-# generate a keypair and make it available via share
-echo "Generating keypair for key name: "#{SSH_KEY_NAME}"
-ssh-keygen -t rsa -N "" -f "#{SSH_KEY_PATH}"
-chown -R vagrant:vagrant "#{VAHOME}" ; chmod 600 "#{SSH_KEY_PATH}" ; chmod 644 "#{SSH_KEY_PATH}.pub"
+    # generate a keypair and make it available via share
+    echo "Generating keypair for key name: #{SSH_KEY_NAME}"
+    ssh-keygen -t rsa -N "" -f "#{SSH_KEY_PATH}"
+    chown -R vagrant:vagrant "#{VAHOME}" ; chmod 600 "#{SSH_KEY_PATH}" ; chmod 644 "#{SSH_KEY_PATH}.pub"
 
-# add the vagrant keypair and open up security groups
-echo "Adding keypair and creating security group rules..."
-cd "#{VAHOME}/devstack"
-for user in admin demo; do
+    # add the vagrant keypair and open up security groups
+    echo "Adding keypair and creating security group rules..."
+    cd "#{VAHOME}/devstack"
+    for user in admin demo; do
 
-  # Source OpenStack credentials and add keypair
-  source openrc $user $user
-  nova keypair-add --pub-key "#{SSH_KEY_PATH}.pub" "#{SSH_KEY_NAME}"
+        # Source OpenStack credentials and add keypair
+        source openrc $user $user
+        nova keypair-add --pub-key "#{SSH_KEY_PATH}.pub" "#{SSH_KEY_NAME}"
 
-  # Allow for UDP and ICMP
-  nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
-  nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
+        # Allow for UDP and ICMP
+        nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
+        nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0
 
-  # Add TCP rules
-  for port in `echo "#{SECURITY_GROUP_RULES}"` ; do
-    nova secgroup-add-rule "#{SECURITY_GROUP_NAME}" tcp $port $port 0.0.0.0/0
-  done
-done
+        # Add TCP rules
+        for port in `echo "#{SECURITY_GROUP_RULES}"` ; do
+            nova secgroup-add-rule "#{SECURITY_GROUP_NAME}" tcp $port $port 0.0.0.0/0
+            done
+            done
 
-echo "" ; echo "Security group rules and keypair creation output:"
-echo "" ; nova secgroup-list-rules default
-echo "" ; nova keypair-list
+            echo "" ; echo "Security group rules and keypair creation output:"
+            echo "" ; nova secgroup-list-rules default
+            echo "" ; nova keypair-list
 
-# use the google dns server as a sane default
-echo "Adding DNS servers to subnets..."
-sourceadmin
-neutron subnet-update "#{PUBLIC_SUBNET_NAME}" --dns_nameservers list=true "#{DNS}"
-neutron subnet-update "#{PRIVATE_SUBNET_NAME}" --dns_nameservers list=true "#{DNS}"
-echo "" ; echo "Neutron subnet configuration output:"
-echo "" ; neutron subnet-list ; neutron subnet-show "#{PUBLIC_SUBNET_NAME}" ; neutron subnet-show "#{PUBLIC_SUBNET_NAME}"
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+            # use the google dns server as a sane default
+            echo "Adding DNS servers to subnets..."
+            sourceadmin
+            neutron subnet-update "#{PUBLIC_SUBNET_NAME}" --dns_nameservers list=true "#{DNS}"
+            neutron subnet-update "#{PRIVATE_SUBNET_NAME}" --dns_nameservers list=true "#{DNS}"
+            echo "" ; echo "Neutron subnet configuration output:"
+            echo "" ; neutron subnet-list ; neutron subnet-show "#{PUBLIC_SUBNET_NAME}" ; neutron subnet-show "#{PUBLIC_SUBNET_NAME}"
+            echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
-# Setup web instances
-echo "Setting up web instances..."
-sourcedemo
+            # Setup web instances
+            echo "Setting up web instances..."
+            sourcedemo
 
-# Create a custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
-echo "" ; echo "Creating custom flavor "#{DEFAULT_NOVA_FLAVOR_NAME}" for web instances..."
-echo "" ; nova flavor-create --is-public true "#{DEFAULT_NOVA_FLAVOR_NAME}" 6 64 1 1
-echo "" ; echo "Custom flavor creation output:"
-echo "" ; nova flavor-list ; nova flavor-show "#{DEFAULT_NOVA_FLAVOR_NAME}"
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+            # Create a custom flavor for small cirros instances (id 6, 128 mb ram, 1 cpu, 1 gb disk)
+            echo "" ; echo "Creating custom flavor '#{DEFAULT_NOVA_FLAVOR_NAME}' for web instances..."
+            echo "" ; nova flavor-create --is-public true "#{DEFAULT_NOVA_FLAVOR_NAME}" 6 64 1 1
+            echo "" ; echo "Custom flavor creation output:"
+            echo "" ; nova flavor-list ; nova flavor-show "#{DEFAULT_NOVA_FLAVOR_NAME}"
+            echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
-# Spawn instances
-echo "" ; echo "Spawning instances..."
-num=1
+            # Spawn instances
+            echo "" ; echo "Spawning instances..."
+            num=1
 
-while [ $num -le 3 ] ; do
+            while [ $num -le 3 ] ; do
 
-  echo "Creating instance node$num..."
-  echo "nova boot --image "#{DEFAULT_NOVA_IMAGE}" --flavor "#{DEFAULT_NOVA_FLAVOR_ID}" --nic net-id="$PRIVATE_NETWORK_ID",v4-fixed-ip=#{PRIVATE_NETWORK}.10$num --key-name "#{SSH_KEY_NAME}" node$num"
-  nova boot --image "#{DEFAULT_NOVA_IMAGE}" --flavor "#{DEFAULT_NOVA_FLAVOR_ID}" --nic net-id="$PRIVATE_NETWORK_ID",v4-fixed-ip=#{PRIVATE_NETWORK}.10$num --key-name "#{SSH_KEY_NAME}" node$num
-  echo "" ; echo "Sleeping 5 seconds..." ; sleep 30
+                echo "Creating instance node$num..."
+                echo "nova boot --image '#{DEFAULT_NOVA_IMAGE}' --flavor '#{DEFAULT_NOVA_FLAVOR_ID}' --nic net-id='$PRIVATE_NETWORK_ID,v4-fixed-ip='#{PRIVATE_NETWORK}'.10$num --key-name '#{SSH_KEY_NAME}' node$num"
+                nova boot --image "#{DEFAULT_NOVA_IMAGE}" --flavor "#{DEFAULT_NOVA_FLAVOR_ID}" --nic net-id="$PRIVATE_NETWORK_ID",v4-fixed-ip=#{PRIVATE_NETWORK}.10$num --key-name "#{SSH_KEY_NAME}" node$num
+                  echo "" ; echo "Sleeping 5 seconds..." ; sleep 30
 
-  echo "" ; echo "instance node$num created:"
-  echo "" ; nova show node$num
+                echo "" ; echo "instance node$num created:"
+                echo "" ; nova show node$num
 
-  num=$(( $num + 1 ))
+                num=$(( $num + 1 ))
 
-done
+                done
 
-echo "" ; echo "All instances created."
-echo "" ; nova list
+                echo "" ; echo "All instances created."
+                echo "" ; nova list
 
-# Create load balancer pool
-echo "Creating load balancer pool..."
-sourcedemo
-echo "neutron lb-pool-create --lb-method ROUND_ROBIN --name "#{LBPOOL_NAME}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID"
-neutron lb-pool-create --lb-method ROUND_ROBIN --name "#{LBPOOL_NAME}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID
-echo "" ; echo "Load balancer pool creation complete:"
-neutron lb-pool-list
-echo "" ; echo "Sleeping 10 seconds..." ; sleep 10
+                # Create load balancer pool
+                echo "Creating load balancer pool..."
+                sourcedemo
+                echo "neutron lb-pool-create --lb-method ROUND_ROBIN --name "#{LBPOOL_NAME}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID"
+                neutron lb-pool-create --lb-method ROUND_ROBIN --name "#{LBPOOL_NAME}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID
+                echo "" ; echo "Load balancer pool creation complete:"
+                neutron lb-pool-list
+                echo "" ; echo "Sleeping 10 seconds..." ; sleep 10
 
-# Add load balancer members
-echo "Adding load balancer pool members..."
-sourcedemo
-num=1
-while [ $num -le 3 ]; do
+                # Add load balancer members
+                echo "Adding load balancer pool members..."
+                sourcedemo
+                num=1
+                while [ $num -le 3 ]; do
 
-  echo "Adding member node$num to load balancer pool..."
-  echo "neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num" --protocol-port "#{LBPOOL_PORT}" "#{LBPOOL_NAME}""
-  
-  neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num" --protocol-port "#{LBPOOL_PORT}" "#{LBPOOL_NAME}"
-  
-  echo "" ; echo "Load balancer pool member $num added."
-  echo "" ; echo "Sleeping 3 seconds..." ; sleep 3
-  num=$(( $num + 1 ))
+                    echo "Adding member node$num to load balancer pool..."
+                    echo "neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num" --protocol-port "#{LBPOOL_PORT}" "#{LBPOOL_NAME}""
 
-done
+                    neutron lb-member-create --address "#{PRIVATE_NETWORK}.10$num" --protocol-port "#{LBPOOL_PORT}" "#{LBPOOL_NAME}"
 
-echo "" ; echo "All load balancer members added to "#{LBPOOL_NAME}"."
-neutron lb-member-list
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+                    echo "" ; echo "Load balancer pool member $num added."
+                    echo "" ; echo "Sleeping 3 seconds..." ; sleep 3
+                    num=$(( $num + 1 ))
 
-# Setup load balancer health monitor
-sourcedemo
+                    done
 
-echo "Creating load balancer health monitor..."
-echo "neutron lb-healthmonitor-create --delay 3 --type "#{LBPOOL_PROTOCOL}" --max-retries 3 --timeout 3"
-neutron lb-healthmonitor-create --delay 3 --type "#{LBPOOL_PROTOCOL}" --max-retries 3 --timeout 3
+                    echo "" ; echo "All load balancer members added to "#{LBPOOL_NAME}"."
+                    neutron lb-member-list
+                    echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
-echo "Associating health monitor..."
-echo "healthmonitorid=`neutron lb-healthmonitor-list | grep "#{LBPOOL_PROTOCOL}" | awk '{ print $2 }'`"
+                    # Setup load balancer health monitor
+                    sourcedemo
 
-healthmonitorid=`neutron lb-healthmonitor-list | grep "#{LBPOOL_PROTOCOL}" | awk '{ print $2 }'`
-echo "neutron lb-healthmonitor-associate $healthmonitorid" "#{LBPOOL_NAME}""
+                    echo "Creating load balancer health monitor..."
+                    echo "neutron lb-healthmonitor-create --delay 3 --type "#{LBPOOL_PROTOCOL}" --max-retries 3 --timeout 3"
+                    neutron lb-healthmonitor-create --delay 3 --type "#{LBPOOL_PROTOCOL}" --max-retries 3 --timeout 3
+
+                    echo "Associating health monitor..."
+                    echo "healthmonitorid=`neutron lb-healthmonitor-list | grep "#{LBPOOL_PROTOCOL}" | awk '{ print $2 }'`"
+
+                    healthmonitorid=`neutron lb-healthmonitor-list | grep "#{LBPOOL_PROTOCOL}" | awk '{ print $2 }'`
+                    echo "neutron lb-healthmonitor-associate $healthmonitorid" "#{LBPOOL_NAME}""
 neutron lb-healthmonitor-associate $healthmonitorid" "#{LBPOOL_NAME}"
 
-echo "" ; echo "Health monitor added to "#{LBPOOL_NAME}"."
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
-neutron lb-healthmonitor-list
+                    echo "" ; echo "Health monitor added to "#{LBPOOL_NAME}"."
+                    echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+                    neutron lb-healthmonitor-list
 
-# Create load balancer vip
-echo "Creating load balancer vip..."
-sourcedemo
+                    # Create load balancer vip
+                    echo "Creating load balancer vip..."
+                    sourcedemo
 
-echo "neutron lb-vip-create --name "#{PRIVATE_NETWORK_VIP_NAME} --protocol-port "#{LBPOOL_PORT}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID --address "#{PRIVATE_NETWORK_VIP}" "#{LBPOOL_NAME}""
-neutron lb-vip-create --name "#{PRIVATE_NETWORK_VIP_NAME} --protocol-port "#{LBPOOL_PORT}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID --address "#{PRIVATE_NETWORK_VIP}" "#{LBPOOL_NAME}"
+                    echo "neutron lb-vip-create --name "#{PRIVATE_NETWORK_VIP_NAME} --protocol-port "#{LBPOOL_PORT}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID --address "#{PRIVATE_NETWORK_VIP}" "#{LBPOOL_NAME}""
+                    neutron lb-vip-create --name "#{PRIVATE_NETWORK_VIP_NAME} --protocol-port "#{LBPOOL_PORT}" --protocol "#{LBPOOL_PROTOCOL}" --subnet-id $PRIVATE_SUBNET_ID --address "#{PRIVATE_NETWORK_VIP}" "#{LBPOOL_NAME}"
 
-echo "" ; echo "Load balancer vip creation complete:"
-echo "" ; neutron lb-vip-list
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+                    echo "" ; echo "Load balancer vip creation complete:"
+                    echo "" ; neutron lb-vip-list
+                    echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
-# Add load balancer floating ip
-echo "Adding floating ip to load balancer..."
-sourcedemo
+                    # Add load balancer floating ip
+                    echo "Adding floating ip to load balancer..."
+                    sourcedemo
 
-echo "neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK_VIP}" --floating-ip-address "#{PUBLIC_NETWORK_VIP}" public"
-portid=`neutron port-list | grep "#{PRIVATE_NETWORK_VIP}" | awk '{ print $2 }'`
-neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK_VIP}" --floating-ip-address "#{PUBLIC_NETWORK_VIP}" public
+                    echo "neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK_VIP}" --floating-ip-address "#{PUBLIC_NETWORK_VIP}" public"
+                    portid=`neutron port-list | grep "#{PRIVATE_NETWORK_VIP}" | awk '{ print $2 }'`
+                    neutron floatingip-create --port-id $portid --fixed-ip-address "#{PRIVATE_NETWORK_VIP}" --floating-ip-address "#{PUBLIC_NETWORK_VIP}" public
 
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
-neutron floatingip-list
+                    echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+                    neutron floatingip-list
 
-# Turn on an http listener for each host
-echo "Creating an HTTP listener on each node..."
+                    # Turn on an http listener for each host
+                    echo "Creating an HTTP listener on each node..."
 
-for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103"; do
+                    for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103"; do
 
-  echo "Creating listener on $ip ..."
-  ssh -i "#{SSH_KEY_PATH}" -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
-  echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
+                        echo "Creating listener on $ip ..."
+                        ssh -i "#{SSH_KEY_PATH}" -o BatchMode=yes -o StrictHostKeyChecking=no cirros@$ip "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\nYou are connected to $ip' | sudo nc -l -p 80 ; done &"
+                        echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
-done
+                        done
 
-echo "All listeners created."
-echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
-
-
-# Testing VIPs
-echo "Testing the HTTP listener on each node..."
-
-for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103" ; do
-
-  echo ""
-  echo "Testing port 80 on $ip..."
-  num=1
-  while [[ num++ -lt 3 ]]; do
-    result=`curl --connect-timeout 1 http://$ip 2> /dev/null`
-    echo "Testing HTTP access to $ip...returns...$result"
-  done
-
-done
+                        echo "All listeners created."
+                        echo "" ; echo "Sleeping 5 seconds..." ; sleep 5
 
 
-for vip in "#{PRIVATE_NETWORK_VIP}" "#{PUBLIC_NETWORK_VIP}" ; do
+                        # Testing VIPs
+                        echo "Testing the HTTP listener on each node..."
 
-  echo ""
-  echo "Testing $vip..."
-  num=1
-  while [[ num++ -lt 6 ]]; do
-    result=`curl --connect-timeout 1 http://$vip 2> /dev/null`
-    echo "Testing HTTP access to $vip...returns...$result"
-  done
+                        for ip in "#{PRIVATE_NETWORK}.101" "#{PRIVATE_NETWORK}.102" "#{PRIVATE_NETWORK}.103" ; do
 
-done
+                            echo ""
+                            echo "Testing port 80 on $ip..."
+                            num=1
+                            while [[ num++ -lt 3 ]]; do
+                                result=`curl --connect-timeout 1 http://$ip 2> /dev/null`
+                                echo "Testing HTTP access to $ip...returns...$result"
+                                done
 
-    EOF
+                                done
 
-  end
 
-end
+                                for vip in "#{PRIVATE_NETWORK_VIP}" "#{PUBLIC_NETWORK_VIP}" ; do
+
+                                    echo ""
+                                    echo "Testing $vip..."
+                                    num=1
+                                    while [[ num++ -lt 6 ]]; do
+                                        result=`curl --connect-timeout 1 http://$vip 2> /dev/null`
+                                        echo "Testing HTTP access to $vip...returns...$result"
+                                        done
+
+                                        done
+
+                                        EOF
+
+                                      end
+
+                                    end

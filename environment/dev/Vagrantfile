@@ -5,7 +5,7 @@
 
 # Set build type and version
 BUILD_TYPE="COMPLETE" # Set build type to "BASE", "STAGED" or "COMPLETE" based on your build need
-BUILD_VERSION="DEV" # Set build version to "STABLE" or "DEV" to enable or disable experimental features
+BUILD_VERSION="STABLE" # Set build version to "STABLE" or "DEV" to enable or disable experimental features
 
 # Set OS config
 OS_HOSTNAME = "DEVSTACK-#{BUILD_VERSION}-#{BUILD_TYPE}" # Hostname for the OS, defaults to devstack + build version + build type
@@ -246,7 +246,7 @@ PUBLIC_INTERFACE=#{PUBLIC_NEUTRON_INTERFACE}
 FIXED_RANGE=#{PRIVATE_NETWORK}.0/24
 FLOATING_RANGE=#{PUBLIC_NETWORK}.0/24
 PUBLIC_NETWORK_GATEWAY=#{PUBLIC_NETWORK}.2
-Q_FLOATING_ALLOCATION_POOL=start=#{PUBLIC_NETWORK}.3,end=#{PUBLIC_NETWORK}.254
+Q_FLOATING_ALLOCATION_POOL="start='#{PUBLIC_NETWORK}'.3,end='#{PUBLIC_NETWORK}'.254"
 
 # Enable Ceilometer - Metering Service (metering + alarming)
 enable_service ceilometer-collector
