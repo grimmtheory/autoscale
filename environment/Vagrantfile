@@ -7,6 +7,7 @@
 HOST_IP = "192.168.33.2"
 DNS = "10.0.2.3"
 VM_NET = "192.168.27"
+VM_NAME = "devstack2"
 
 # Set DevStack info
 DEVSTACK_BRANCH = "master"
@@ -20,7 +21,7 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "devstack-staged"
   
   # set the hostname, otherwise qrouter will be lost upon reload
-  config.vm.hostname = "devstack"
+  config.vm.hostname = "#{VM_NAME}"
 
   # eth1, this will be the management endpoint
   config.vm.network :private_network, ip: "#{HOST_IP}"
@@ -32,7 +33,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vb|
 
     # Lable the virtual machine
-    vb.name = "devstack"
+    vb.name = "#{VM_NAME}"
 
     # Enable the Virtual Box GUI on boot, i.e. not "headless"
     vb.gui = true
