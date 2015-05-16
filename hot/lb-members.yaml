@@ -1,4 +1,4 @@
-heat_template_version: 2014-10-16  
+heat_template_version: 2014-10-16
 parameters:
   key_name:
     type: string
@@ -24,24 +24,16 @@ parameters:
   pool_id:
     type: string
     default: c7d13ae7-a160-4253-b0f2-09b8c15c3b6b
-  initial_capacity:
+  capacity_count:
     type: number
     default: 2
-  asg_group_min_size:
-    type: number
-    default: 1
-  asg_group_max_size:
-    type: number
-    default: 3
 
 resources:
   web_scaler:
-    type: OS::Heat::AutoScalingGroup
+    type: OS::Heat::ResourceGroup
     properties:
-      desired_capacity: {get_param: initial_capacity}
-      max_size: {get_param: asg_group_max_size}
-      min_size: {get_param: asg_group_min_size}
-      resource:
+      count: {get_param: capacity_count}
+      resource_def:
         type: OS::Nova::Server::Scaled
         properties:
           node_server_flavor: {get_param: node_server_flavor}

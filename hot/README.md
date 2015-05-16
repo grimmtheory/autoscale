@@ -59,7 +59,7 @@ This a two-part lab.
 Part 1:
 -------
 - Creates and configures a load balancer pool with ROUND_ROBIN policy over http.
-- Createss a health monitor and associates it with the loadbalancer pool
+- Creates a health monitor and associates it with the loadbalancer pool
 - Creates a vip from the internal subnet and assigns it to the loadbalancer pool
 - Creates a floating ip and associates it with the vip of the loadbalancer pool
 
@@ -113,9 +113,7 @@ heat stack-create lb-members-stack -f lb-members.yaml -e environment.yaml --para
 ;private_net_id=<private_net_id>;\
 ;private_subnet_id=<private_subnet_id>;\
 ;pool_id=<pool_id>\
-;initial_capacity=<initial-number-of-members>\
-;asg_group_min_size=<asg_group_min_size>\
-;asg_group_max_size=<asg_group_max_size>"
+;capacity_count=<capacity_count>"
 ```
 
 Verification:  
