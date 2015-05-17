@@ -2,10 +2,8 @@ heat_template_version: 2014-10-16
 parameters:
   floating_net_id:
     type: string
-    default: 8f3508a9-d4f5-4f9c-a5da-fd7f04059303
   private_subnet_id:
     type: string
-    default: d53a30db-9e9d-4841-a115-ff22746a39f5
 
 resources:
   monitor:

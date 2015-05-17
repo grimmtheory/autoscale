@@ -2,28 +2,24 @@ heat_template_version: 2014-10-16
 parameters:
   key_name:
     type: string
-    default: sc-key
+    default: my-key
   node_name:
     type: string
     default: lb-vm
   node_server_flavor:
     type: string
-    default: Micro-Small
+    default: m1.small
   node_image_name:
     type: string
-    default: Ubuntu-14.04
+    default: cirros-0.3.4-x86_64-uec
   floating_net_id:
     type: string
-    default: 8f3508a9-d4f5-4f9c-a5da-fd7f04059303
   private_net_id:
     type: string
-    default: 27764506-0338-45d3-8e8e-a5fbc050ec9c
   private_subnet_id:
     type: string
-    default: d53a30db-9e9d-4841-a115-ff22746a39f5
   pool_id:
     type: string
-    default: c7d13ae7-a160-4253-b0f2-09b8c15c3b6b
   initial_capacity:
     type: number
     default: 1
